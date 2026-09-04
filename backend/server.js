@@ -11,9 +11,27 @@ app.use(cors());
 app.use(express.json());
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('Enterprise MongoDB Connected Successfully'))
-  .catch((err) => console.error('MongoDB Connection Error:', err));
+const connectDB = async () => {
+  if (mongoose.connection.readyState >= 1) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      serverSelectionTimeoutMS: 5000, // Fail fast on Vercel if unable to connect
+    });
+    console.log('Enterprise MongoDB Connected Successfully');
+  } catch (err) {
+    console.error('MongoDB Connection Error:', err);
+    throw err;
+  }
+};
+
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
 
 // Basic Health Check Route
 app.get('/api/health', (req, res) => {

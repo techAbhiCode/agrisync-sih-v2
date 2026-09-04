@@ -1,9 +1,9 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, AlertCircle, Filter, CalendarRange, Check, CalendarDays, LineChart, MapPin } from 'lucide-react';
+import { TrendingUp, TrendingDown, AlertCircle, Filter, Check, LineChart, MapPin } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 
 import { getMarketInsights, getLatestMandiPrices } from '@/lib/api';
@@ -20,12 +20,12 @@ const COLORS = {
   maize: { stroke: '#eab308', fill: '#eab308' },
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.1 } }
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 15 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
@@ -34,15 +34,15 @@ const itemVariants = {
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-zinc-900/95 backdrop-blur-md border border-zinc-700 p-4 rounded-xl shadow-xl min-w-[150px]">
-        <p className="text-zinc-400 text-xs uppercase tracking-wider mb-2 font-semibold">{label}</p>
+      <div className="bg-white/95 backdrop-blur-md border border-green-300 p-4 rounded-xl shadow-xl min-w-[150px]">
+        <p className="text-gray-600 text-xs uppercase tracking-wider mb-2 font-semibold">{label}</p>
         <div className="space-y-1.5">
           {payload.map((entry: any, index: number) => (
             <div key={index} className="flex items-center justify-between gap-4">
               <span className="capitalize font-medium text-sm" style={{ color: entry.color }}>
                 {entry.name}
               </span>
-              <span className="text-zinc-200 font-semibold text-sm">
+              <span className="text-green-900 font-semibold text-sm">
                 ₹{entry.value}
               </span>
             </div>
@@ -150,18 +150,18 @@ export default function MarketTrends() {
       >
         <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white mb-2">
+            <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-green-950 mb-2">
               Market <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-600">Trends & AI Insights</span>
             </h1>
-            <p className="text-zinc-400 text-sm md:text-base">Real-time mandi prices and ML-based forecasting.</p>
+            <p className="text-gray-600 text-sm md:text-base">Real-time mandi prices and ML-based forecasting.</p>
           </div>
         </motion.div>
 
         {/* Latest Mandi Prices Section */}
         <motion.div variants={itemVariants} className="space-y-4 mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-xl font-bold text-zinc-100 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-emerald-500" /> Latest Mandi Prices
+            <h2 className="text-xl font-bold text-green-950 flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-green-700" /> Latest Mandi Prices
             </h2>
             <div className="flex gap-2 w-full sm:w-auto">
               <select
@@ -179,7 +179,7 @@ export default function MarketTrends() {
                     setSelectedDistrict("");
                   }
                 }}
-                className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-40"
+                className="bg-white border border-green-200 text-green-800 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-40"
               >
                 {allStates.map((state) => (
                   <option key={state.code} value={state.code}>{state.name}</option>
@@ -188,7 +188,7 @@ export default function MarketTrends() {
               <select
                 value={selectedDistrict}
                 onChange={(e) => setSelectedDistrict(e.target.value)}
-                className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-40"
+                className="bg-white border border-green-200 text-green-800 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-emerald-500/50 w-full sm:w-40"
                 disabled={districts.length === 0}
               >
                 {districts.map((district) => (
@@ -200,29 +200,29 @@ export default function MarketTrends() {
 
           {isLoadingMandi ? (
             <div className="flex justify-center items-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-emerald-500" />
+              <Loader2 className="h-8 w-8 animate-spin text-green-700" />
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mandiPrices.map((item, idx) => (
-                <Card key={idx} className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 hover:border-emerald-500/30 transition-all group overflow-hidden relative">
+                <Card key={idx} className="bg-white/40 backdrop-blur-xl border-green-200/50 hover:border-emerald-500/30 transition-all group overflow-hidden relative">
                   <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500/50 group-hover:bg-emerald-500 transition-colors" />
                   <CardContent className="p-5">
                     <h3 className="font-bold text-emerald-400 text-lg mb-1">{item.crop}</h3>
-                    <p className="text-zinc-500 text-xs flex items-center gap-1 mb-4">
+                    <p className="text-gray-500 text-xs flex items-center gap-1 mb-4">
                       <MapPin className="h-3 w-3" /> {item.mandi}
                     </p>
-                    <div className="bg-zinc-950/50 rounded-lg p-3 flex justify-between items-center border border-zinc-800/50">
-                      <span className="text-zinc-400 text-xs font-medium">Modal Price</span>
+                    <div className="bg-green-50/50 rounded-lg p-3 flex justify-between items-center border border-green-200/50">
+                      <span className="text-gray-600 text-xs font-medium">Modal Price</span>
                       <div className="flex items-center gap-2">
                         {item.trend === 'up' ? (
-                          <TrendingUp className="h-4 w-4 text-emerald-500" />
+                          <TrendingUp className="h-4 w-4 text-green-700" />
                         ) : item.trend === 'down' ? (
                           <TrendingDown className="h-4 w-4 text-orange-500" />
                         ) : (
                           <div className="h-1 w-3 bg-zinc-500 rounded-full" />
                         )}
-                        <span className="text-zinc-200 font-bold">₹{item.price}<span className="text-zinc-500 text-xs font-normal">/{item.unit}</span></span>
+                        <span className="text-green-900 font-bold">₹{item.price}<span className="text-gray-500 text-xs font-normal">/{item.unit}</span></span>
                       </div>
                     </div>
                   </CardContent>
@@ -236,9 +236,9 @@ export default function MarketTrends() {
         <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           
           {/* Crop Selector */}
-          <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 lg:col-span-2">
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 lg:col-span-2">
             <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              <div className="flex items-center gap-2 text-zinc-400 text-sm font-medium">
+              <div className="flex items-center gap-2 text-gray-600 text-sm font-medium">
                 <Filter className="h-4 w-4" /> Compare Crops
               </div>
               <div className="flex flex-wrap gap-2">
@@ -248,8 +248,8 @@ export default function MarketTrends() {
                     onClick={() => toggleCrop(crop)}
                     className={`px-4 py-2 rounded-full border text-sm font-medium transition-all flex items-center gap-2 capitalize ${
                       activeCrops[crop] 
-                      ? `bg-zinc-800 text-white border-[${COLORS[crop].stroke}]` 
-                      : 'bg-zinc-950/50 text-zinc-500 border-zinc-800 hover:border-zinc-700'
+                      ? `bg-green-50 text-green-950 border-[${COLORS[crop].stroke}]` 
+                      : 'bg-green-50/50 text-gray-500 border-green-200 hover:border-green-300'
                     }`}
                     style={{ borderColor: activeCrops[crop] ? COLORS[crop].stroke : '' }}
                   >
@@ -262,18 +262,18 @@ export default function MarketTrends() {
           </Card>
 
           {/* Timeframe & Gap Selector */}
-          <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50">
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50">
             <CardContent className="p-4 space-y-4">
-              <div className="flex rounded-lg overflow-hidden border border-zinc-800 p-1 bg-zinc-950/50">
+              <div className="flex rounded-lg overflow-hidden border border-green-200 p-1 bg-green-50/50">
                 <button
                   onClick={() => setTimeframe('yearly')}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'yearly' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'yearly' ? 'bg-green-50 text-green-950 shadow' : 'text-gray-500 hover:text-green-800'}`}
                 >
                   5 Years
                 </button>
                 <button
                   onClick={() => setTimeframe('monthly')}
-                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'monthly' ? 'bg-zinc-800 text-white shadow' : 'text-zinc-500 hover:text-zinc-300'}`}
+                  className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'monthly' ? 'bg-green-50 text-green-950 shadow' : 'text-gray-500 hover:text-green-800'}`}
                 >
                   Monthly (1Y)
                 </button>
@@ -287,7 +287,7 @@ export default function MarketTrends() {
                     exit={{ opacity: 0, height: 0 }}
                     className="flex flex-col gap-2"
                   >
-                    <Label className="text-zinc-400 text-xs">Interval Gap</Label>
+                    <Label className="text-gray-600 text-xs">Interval Gap</Label>
                     <div className="flex gap-2">
                       {[
                         { val: 0, label: 'None' },
@@ -298,7 +298,7 @@ export default function MarketTrends() {
                           key={g.val}
                           onClick={() => setGap(g.val)}
                           className={`flex-1 py-1 border rounded-md text-xs font-medium transition-all ${
-                            gap === g.val ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:border-zinc-700'
+                            gap === g.val ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400' : 'bg-white border-green-200 text-gray-500 hover:border-green-300'
                           }`}
                         >
                           {g.label}
@@ -314,10 +314,10 @@ export default function MarketTrends() {
 
         {/* The Chart */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 shadow-2xl">
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl">
             <CardHeader className="pb-2">
-              <CardTitle className="text-zinc-100 flex items-center gap-2 text-lg">
-                <LineChart className="h-5 w-5 text-emerald-500" />
+              <CardTitle className="text-green-950 flex items-center gap-2 text-lg">
+                <LineChart className="h-5 w-5 text-green-700" />
                 Commodity Price Aggregation (₹ per Quintal)
               </CardTitle>
             </CardHeader>
@@ -365,14 +365,14 @@ export default function MarketTrends() {
           <Card className="bg-lime-950/20 border-lime-900/30">
             <CardContent className="p-5 flex gap-4">
               <div className="p-3 bg-lime-900/30 rounded-full h-fit">
-                <TrendingUp className="h-5 w-5 text-lime-500" />
+                <TrendingUp className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <h3 className="text-lime-500 font-semibold mb-1 text-sm flex items-center gap-2">
+                <h3 className="text-green-600 font-semibold mb-1 text-sm flex items-center gap-2">
                   Market Forecast (AI)
                   {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                 </h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+                <p className="text-gray-600 text-xs leading-relaxed">
                   {isLoading ? "Analyzing market trends..." : (insights.prediction || "Select timeframe to see AI market predictions.")}
                 </p>
               </div>
@@ -389,7 +389,7 @@ export default function MarketTrends() {
                   Smart Spoilage Alert
                   {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                 </h3>
-                <p className="text-zinc-400 text-xs leading-relaxed">
+                <p className="text-gray-600 text-xs leading-relaxed">
                   {isLoading ? "Generating risk assessment..." : (insights.alert || "Select timeframe to see AI spoilage alerts.")}
                 </p>
               </div>

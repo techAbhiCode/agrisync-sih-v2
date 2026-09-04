@@ -80,12 +80,12 @@ export default function MandiMap({ userLocation, mandis, trucks = [], onBookTruc
     setMounted(true);
   }, []);
 
-  if (!mounted) return <div className="h-[500px] w-full bg-zinc-900 rounded-xl border border-zinc-800 animate-pulse" />;
+  if (!mounted) return <div className="h-[500px] w-full bg-white rounded-xl border border-green-200 animate-pulse" />;
 
   const center: [number, number] = userLocation ? [userLocation.lat, userLocation.lng] : [26.4609, 80.3217];
 
   return (
-    <div className="h-[500px] w-full rounded-xl overflow-hidden border border-zinc-800 shadow-2xl relative z-0">
+    <div className="h-[500px] w-full rounded-xl overflow-hidden border border-green-200 shadow-2xl relative z-0">
       <MapContainer 
         center={center} 
         zoom={11} 
@@ -118,12 +118,12 @@ export default function MandiMap({ userLocation, mandis, trucks = [], onBookTruc
               <div className="text-sm border-b border-zinc-200 pb-2 mb-2">
                 <span className="block text-zinc-600">Capacity: {mandi.capacity} Qtl</span>
                 <span className="block font-medium text-emerald-600">Available: {mandi.available} Qtl</span>
-                {mandi.distance && <span className="block text-zinc-500 mt-1">Distance: {mandi.distance} km</span>}
+                {mandi.distance && <span className="block text-gray-500 mt-1">Distance: {mandi.distance} km</span>}
               </div>
               <Button 
                 size="sm" 
                 onClick={() => navigate(`/booking?mandi=${encodeURIComponent(mandi.name)}`)}
-                className="w-full bg-zinc-900 text-white hover:bg-zinc-800"
+                className="w-full bg-white text-green-950 hover:bg-green-50"
               >
                 Book Slot Here
               </Button>
@@ -142,12 +142,12 @@ export default function MandiMap({ userLocation, mandis, trucks = [], onBookTruc
                 <span className="block font-medium text-zinc-800">{truck.driverName}</span>
                 <span className="block text-zinc-600">{truck.type} (Cap: {truck.capacity} Qtl)</span>
                 <span className="block font-semibold text-emerald-600 mt-1">₹{truck.pricePerKm}/km</span>
-                {truck.distance && <span className="block text-zinc-500 text-xs mt-1">{truck.distance} km away</span>}
+                {truck.distance && <span className="block text-gray-500 text-xs mt-1">{truck.distance} km away</span>}
               </div>
               <Button 
                 size="sm" 
                 onClick={() => onBookTruck && onBookTruck(truck)}
-                className="w-full bg-orange-500 text-white hover:bg-orange-600"
+                className="w-full bg-orange-500 text-green-950 hover:bg-orange-600"
               >
                 Book Truck
               </Button>

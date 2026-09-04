@@ -19,7 +19,7 @@ const typeConfig: Record<NotifType, { icon: React.ReactNode; color: string; bg: 
   success: {
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     color: 'text-lime-400',
-    bg: 'bg-lime-500/10 border-lime-500/20',
+    bg: 'bg-green-600/10 border-green-500/20',
   },
   warning: {
     icon: <AlertTriangle className="h-3.5 w-3.5" />,
@@ -61,7 +61,7 @@ export default function NotificationPanel() {
       <button
         id="notif-bell"
         onClick={() => setOpen((v) => !v)}
-        className="relative p-2 rounded-full hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-100 transition-colors"
+        className="relative p-2 rounded-full hover:bg-green-100/80 text-gray-600 hover:text-green-950 transition-colors"
         aria-label="Notifications"
       >
         <Bell className="h-5 w-5" />
@@ -72,7 +72,7 @@ export default function NotificationPanel() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0 }}
-              className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-white text-[9px] font-bold rounded-full px-1"
+              className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center bg-red-500 text-green-950 text-[9px] font-bold rounded-full px-1"
             >
               {unreadCount > 9 ? '9+' : unreadCount}
             </motion.span>
@@ -89,14 +89,14 @@ export default function NotificationPanel() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            className="absolute right-0 top-12 w-80 sm:w-[360px] z-[200] bg-zinc-900/95 backdrop-blur-2xl border border-zinc-800 rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-hidden"
+            className="absolute right-0 top-12 w-80 sm:w-[360px] z-[200] bg-white/95 backdrop-blur-2xl border border-green-200 rounded-2xl shadow-[0_24px_80px_rgba(0,0,0,0.9)] overflow-hidden"
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-green-200">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-semibold text-zinc-100">Notifications</h3>
+                <h3 className="text-sm font-semibold text-green-950">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="bg-lime-500/15 text-lime-400 border border-lime-500/20 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                  <span className="bg-green-600/15 text-lime-400 border border-green-500/20 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                     {unreadCount} new
                   </span>
                 )}
@@ -105,20 +105,20 @@ export default function NotificationPanel() {
                 <button
                   onClick={markAllRead}
                   title="Mark all read"
-                  className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-green-50 text-gray-500 hover:text-green-800 transition-colors"
                 >
                   <CheckCheck className="h-4 w-4" />
                 </button>
                 <button
                   onClick={clearAll}
                   title="Clear all"
-                  className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-red-400 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-green-50 text-gray-500 hover:text-red-400 transition-colors"
                 >
                   <Trash2 className="h-4 w-4" />
                 </button>
                 <button
                   onClick={() => setOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-zinc-800 text-zinc-500 hover:text-zinc-300 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-green-50 text-gray-500 hover:text-green-800 transition-colors"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -129,10 +129,10 @@ export default function NotificationPanel() {
             <div className="max-h-[340px] overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-10 gap-2">
-                  <div className="p-3 bg-zinc-800/50 rounded-full">
+                  <div className="p-3 bg-green-100/50 rounded-full">
                     <Bell className="h-6 w-6 text-zinc-600" />
                   </div>
-                  <p className="text-zinc-500 text-sm">You're all caught up!</p>
+                  <p className="text-gray-500 text-sm">You're all caught up!</p>
                 </div>
               ) : (
                 <motion.ul layout>
@@ -143,8 +143,8 @@ export default function NotificationPanel() {
                         key={notif._id}
                         layout
                         onClick={() => markRead(notif._id)}
-                        className={`flex gap-3 px-4 py-3.5 border-b border-zinc-800/50 cursor-pointer transition-colors hover:bg-zinc-800/40 ${
-                          !notif.read ? 'bg-zinc-800/20' : ''
+                        className={`flex gap-3 px-4 py-3.5 border-b border-green-200/50 cursor-pointer transition-colors hover:bg-green-100/40 ${
+                          !notif.read ? 'bg-green-100/20' : ''
                         }`}
                       >
                         <div
@@ -156,7 +156,7 @@ export default function NotificationPanel() {
                           <div className="flex items-start justify-between gap-2">
                             <p
                               className={`text-sm font-semibold leading-snug ${
-                                !notif.read ? 'text-zinc-100' : 'text-zinc-400'
+                                !notif.read ? 'text-green-950' : 'text-gray-600'
                               }`}
                             >
                               {notif.title}
@@ -165,12 +165,12 @@ export default function NotificationPanel() {
                               {timeAgo(notif.createdAt)}
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-500 mt-0.5 leading-relaxed">
+                          <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">
                             {notif.message}
                           </p>
                         </div>
                         {!notif.read && (
-                          <div className="w-2 h-2 rounded-full bg-lime-500 flex-shrink-0 mt-2" />
+                          <div className="w-2 h-2 rounded-full bg-green-600 flex-shrink-0 mt-2" />
                         )}
                       </motion.li>
                     );
@@ -180,8 +180,8 @@ export default function NotificationPanel() {
             </div>
 
             {/* Footer */}
-            <div className="px-4 py-2.5 border-t border-zinc-800 text-center">
-              <button className="text-xs text-zinc-500 hover:text-lime-400 transition-colors font-medium">
+            <div className="px-4 py-2.5 border-t border-green-200 text-center">
+              <button className="text-xs text-gray-500 hover:text-lime-400 transition-colors font-medium">
                 View all activity →
               </button>
             </div>

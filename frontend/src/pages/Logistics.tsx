@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Truck, MapPin, Navigation, CloudLightning, Sun, Droplets, ArrowRight, QrCode, CheckCircle2, Clock, Package } from 'lucide-react';
+import { Truck, MapPin, Navigation, CloudLightning, Sun, Droplets, ArrowRight, QrCode, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -125,11 +125,11 @@ export default function Logistics() {
     <div className="p-8 min-h-full relative overflow-hidden">
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative z-10 space-y-6">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-white mb-2 flex items-center gap-3">
-            <Truck className="h-10 w-10 text-lime-500" />
+          <h1 className="text-4xl font-extrabold tracking-tight text-green-950 mb-2 flex items-center gap-3">
+            <Truck className="h-10 w-10 text-green-600" />
             Micro-<span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-600">Logistics</span>
           </h1>
-          <p className="text-zinc-400">Real-time geospatial tracking and AI route optimization.</p>
+          <p className="text-gray-600">Real-time geospatial tracking and AI route optimization.</p>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -141,27 +141,27 @@ export default function Logistics() {
             <AnimatePresence>
               {weather && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card className="bg-gradient-to-r from-zinc-900 to-zinc-900/50 border-lime-500/20 shadow-xl overflow-hidden relative">
-                    <div className="absolute inset-0 bg-lime-500/5 mix-blend-overlay"></div>
+                  <Card className="bg-gradient-to-r from-zinc-900 to-zinc-900/50 border-green-500/20 shadow-xl overflow-hidden relative">
+                    <div className="absolute inset-0 bg-green-600/5 mix-blend-overlay"></div>
                     <CardHeader className="pb-3 border-b border-white/5">
                       <CardTitle className="text-lg flex items-center gap-2 text-lime-400">
                         <CloudLightning className="h-5 w-5" /> AI Logistics Advisory
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 flex flex-col md:flex-row items-center gap-6">
-                      <div className="flex-1 text-zinc-300 leading-relaxed font-medium">
+                      <div className="flex-1 text-green-800 leading-relaxed font-medium">
                         "{getAIAdvisory()}"
                       </div>
-                      <div className="flex gap-4 text-sm text-zinc-400 bg-zinc-950/50 p-4 rounded-xl border border-zinc-800">
+                      <div className="flex gap-4 text-sm text-gray-600 bg-green-50/50 p-4 rounded-xl border border-green-200">
                         <div className="flex flex-col items-center">
                           <Sun className="h-6 w-6 text-yellow-500 mb-1" />
-                          <span className="font-bold text-white">{weather.temp}°C</span>
+                          <span className="font-bold text-green-950">{weather.temp}°C</span>
                           <span className="text-xs">{weather.condition}</span>
                         </div>
-                        <div className="w-px bg-zinc-800"></div>
+                        <div className="w-px bg-green-50"></div>
                         <div className="flex flex-col items-center">
                           <Droplets className="h-6 w-6 text-blue-400 mb-1" />
-                          <span className="font-bold text-white">{weather.humidity}%</span>
+                          <span className="font-bold text-green-950">{weather.humidity}%</span>
                           <span className="text-xs">Humidity</span>
                         </div>
                       </div>
@@ -174,13 +174,13 @@ export default function Logistics() {
 
           {/* Info Panel Section */}
           <div className="space-y-6">
-            <div className="flex bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800/80">
+            <div className="flex bg-white/50 p-1.5 rounded-xl border border-green-200/80">
               <button
                 onClick={() => setActiveTab('hubs')}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   activeTab === 'hubs' 
-                  ? 'bg-zinc-800 text-lime-400 shadow-sm' 
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-green-50 text-lime-400 shadow-sm' 
+                  : 'text-gray-600 hover:text-green-900'
                 }`}
               >
                 Nearest Hubs
@@ -189,8 +189,8 @@ export default function Logistics() {
                 onClick={() => setActiveTab('trucks')}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   activeTab === 'trucks' 
-                  ? 'bg-zinc-800 text-orange-400 shadow-sm' 
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-green-50 text-orange-400 shadow-sm' 
+                  : 'text-gray-600 hover:text-green-900'
                 }`}
               >
                 Available Trucks
@@ -199,22 +199,22 @@ export default function Logistics() {
                 onClick={() => setActiveTab('my-trucks')}
                 className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${
                   activeTab === 'my-trucks' 
-                  ? 'bg-zinc-800 text-blue-400 shadow-sm' 
-                  : 'text-zinc-400 hover:text-zinc-200'
+                  ? 'bg-green-50 text-blue-400 shadow-sm' 
+                  : 'text-gray-600 hover:text-green-900'
                 }`}
               >
                 My Trucks
               </button>
             </div>
 
-            <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 shadow-2xl h-[600px] flex flex-col">
+            <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl h-[600px] flex flex-col">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-zinc-100">
-                  {activeTab === 'hubs' && <><MapPin className="h-5 w-5 text-lime-500" /> Nearest Active Hubs</>}
+                <CardTitle className="flex items-center gap-2 text-green-950">
+                  {activeTab === 'hubs' && <><MapPin className="h-5 w-5 text-green-600" /> Nearest Active Hubs</>}
                   {activeTab === 'trucks' && <><Truck className="h-5 w-5 text-orange-500" /> Available Trucks</>}
                   {activeTab === 'my-trucks' && <><Package className="h-5 w-5 text-blue-500" /> My Truck Bookings</>}
                 </CardTitle>
-                <CardDescription className="text-zinc-500">
+                <CardDescription className="text-gray-500">
                   {loading ? 'Locating...' : `Based on your live GPS coordinates in ${weather?.location || 'Unknown'}.`}
                 </CardDescription>
 
@@ -223,7 +223,7 @@ export default function Logistics() {
                 {loading ? (
                   <div className="space-y-4 animate-pulse">
                     {[1,2,3].map(i => (
-                      <div key={i} className="h-20 bg-zinc-800/50 rounded-lg"></div>
+                      <div key={i} className="h-20 bg-green-100/50 rounded-lg"></div>
                     ))}
                   </div>
                 ) : (
@@ -234,12 +234,12 @@ export default function Logistics() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="p-4 rounded-xl border border-zinc-800/50 bg-zinc-900 hover:bg-zinc-800/80 transition-colors group"
+                        className="p-4 rounded-xl border border-green-200/50 bg-white hover:bg-green-100/80 transition-colors group"
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <p className="font-semibold text-zinc-100">{mandi.name}</p>
-                            <p className="text-xs text-zinc-400 flex items-center gap-1 mt-1">
+                            <p className="font-semibold text-green-950">{mandi.name}</p>
+                            <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
                               <Navigation className="h-3 w-3" /> {mandi.distance} km away
                             </p>
                           </div>
@@ -249,19 +249,19 @@ export default function Logistics() {
                         </div>
                         
                         <div className="grid grid-cols-2 gap-2 text-xs mb-4">
-                          <div className="bg-zinc-950 rounded p-2 text-center">
-                            <span className="block text-zinc-500">Capacity</span>
-                            <span className="font-medium text-white">{mandi.capacity} Qtl</span>
+                          <div className="bg-green-50 rounded p-2 text-center">
+                            <span className="block text-gray-500">Capacity</span>
+                            <span className="font-medium text-green-950">{mandi.capacity} Qtl</span>
                           </div>
-                          <div className="bg-zinc-950 rounded p-2 text-center">
-                            <span className="block text-zinc-500">Available</span>
-                            <span className="font-medium text-emerald-500">{mandi.available} Qtl</span>
+                          <div className="bg-green-50 rounded p-2 text-center">
+                            <span className="block text-gray-500">Available</span>
+                            <span className="font-medium text-green-700">{mandi.available} Qtl</span>
                           </div>
                         </div>
 
                         <Button 
                           onClick={() => navigate(`/booking?mandi=${encodeURIComponent(mandi.name)}`)}
-                          className="w-full bg-lime-500 hover:bg-lime-600 text-zinc-950 font-semibold text-sm h-9"
+                          className="w-full bg-green-600 hover:bg-green-700 text-zinc-950 font-semibold text-sm h-9"
                         >
                           Book Slot Here <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
@@ -274,12 +274,12 @@ export default function Logistics() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="p-4 rounded-xl border border-zinc-800/50 bg-zinc-900 hover:bg-zinc-800/80 transition-colors group"
+                        className="p-4 rounded-xl border border-green-200/50 bg-white hover:bg-green-100/80 transition-colors group"
                       >
                         <div className="flex justify-between items-start mb-3">
                           <div>
-                            <p className="font-semibold text-zinc-100 flex items-center gap-1">🚛 {truck.vehicleNumber}</p>
-                            <p className="text-xs text-zinc-400 flex items-center gap-1 mt-1">
+                            <p className="font-semibold text-green-950 flex items-center gap-1">🚛 {truck.vehicleNumber}</p>
+                            <p className="text-xs text-gray-600 flex items-center gap-1 mt-1">
                               {truck.driverName} • {truck.distance} km away
                             </p>
                           </div>
@@ -287,19 +287,19 @@ export default function Logistics() {
                         </div>
                         
                         <div className="grid grid-cols-2 gap-2 text-xs mb-4">
-                          <div className="bg-zinc-950 rounded p-2 text-center">
-                            <span className="block text-zinc-500">Type</span>
-                            <span className="font-medium text-white">{truck.type}</span>
+                          <div className="bg-green-50 rounded p-2 text-center">
+                            <span className="block text-gray-500">Type</span>
+                            <span className="font-medium text-green-950">{truck.type}</span>
                           </div>
-                          <div className="bg-zinc-950 rounded p-2 text-center">
-                            <span className="block text-zinc-500">Capacity</span>
-                            <span className="font-medium text-emerald-500">{truck.capacity} Qtl</span>
+                          <div className="bg-green-50 rounded p-2 text-center">
+                            <span className="block text-gray-500">Capacity</span>
+                            <span className="font-medium text-green-700">{truck.capacity} Qtl</span>
                           </div>
                         </div>
 
                         <Button 
                           onClick={() => setBookingTruck(truck)}
-                          className="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm h-9"
+                          className="w-full bg-orange-500 hover:bg-orange-600 text-green-950 font-semibold text-sm h-9"
                         >
                           Book Truck <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
@@ -307,10 +307,10 @@ export default function Logistics() {
                     ))}
                     
                     {activeTab === 'hubs' && mandis.length === 0 && !loading && (
-                      <p className="text-zinc-500 text-center py-4 text-sm">No nearby mandis found.</p>
+                      <p className="text-gray-500 text-center py-4 text-sm">No nearby mandis found.</p>
                     )}
                     {activeTab === 'trucks' && trucks.length === 0 && !loading && (
-                      <p className="text-zinc-500 text-center py-4 text-sm">No nearby trucks found.</p>
+                      <p className="text-gray-500 text-center py-4 text-sm">No nearby trucks found.</p>
                     )}
                     
                     {activeTab === 'my-trucks' && myTrucks.map((booking, idx) => (
@@ -319,12 +319,12 @@ export default function Logistics() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
-                        className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl relative"
+                        className="bg-green-50 border border-green-200 rounded-2xl overflow-hidden shadow-2xl relative"
                       >
                         {/* Ticket Header */}
                         <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-4 flex justify-between items-center relative overflow-hidden">
                           <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
-                          <div className="relative z-10 text-white">
+                          <div className="relative z-10 text-green-950">
                             <h3 className="font-bold text-lg leading-tight">Ticket: {booking.virtualToken || booking.ticketId}</h3>
                             <p className="text-xs text-blue-100/80 mt-0.5">{new Date(booking.createdAt).toLocaleString()}</p>
                           </div>
@@ -334,31 +334,31 @@ export default function Logistics() {
                         </div>
 
                         {/* Details */}
-                        <div className="p-4 bg-zinc-900/80">
+                        <div className="p-4 bg-white/80">
                           <div className="flex justify-between text-sm mb-4">
                             <div>
-                              <p className="text-zinc-500 text-xs">Pickup</p>
-                              <p className="font-medium text-zinc-200">{booking.pickupLocation}</p>
+                              <p className="text-gray-500 text-xs">Pickup</p>
+                              <p className="font-medium text-green-900">{booking.pickupLocation}</p>
                             </div>
                             <div className="text-right">
-                              <p className="text-zinc-500 text-xs">Destination</p>
-                              <p className="font-medium text-zinc-200">{booking.destinationMandi}</p>
+                              <p className="text-gray-500 text-xs">Destination</p>
+                              <p className="font-medium text-green-900">{booking.destinationMandi}</p>
                             </div>
                           </div>
                           
-                          <div className="flex justify-between items-center border-t border-zinc-800/80 pt-4 text-sm">
+                          <div className="flex justify-between items-center border-t border-green-200/80 pt-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <Truck className="h-4 w-4 text-zinc-400" />
-                              <span className="text-zinc-300">{booking.vehicleNumber}</span>
+                              <Truck className="h-4 w-4 text-gray-600" />
+                              <span className="text-green-800">{booking.vehicleNumber}</span>
                             </div>
                             <div className="font-bold text-emerald-400">₹{booking.cost}</div>
                           </div>
                         </div>
 
                         {/* Tracker UI */}
-                        <div className="px-4 pb-5 pt-2 bg-zinc-900/50">
-                          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-3">Live Tracking</p>
-                          <div className="relative border-l border-zinc-800 ml-3 space-y-4">
+                        <div className="px-4 pb-5 pt-2 bg-white/50">
+                          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-3">Live Tracking</p>
+                          <div className="relative border-l border-green-200 ml-3 space-y-4">
                             {(booking.timeline && booking.timeline.length > 0 ? booking.timeline : [{ status: booking.status, description: 'Current status', timestamp: booking.createdAt }]).map((t: any, i: number) => (
                               <div key={i} className="pl-6 relative">
                                 <div className={`absolute -left-[5px] top-1 w-2.5 h-2.5 rounded-full ${
@@ -367,9 +367,9 @@ export default function Logistics() {
                                 }`}></div>
                                 <p className={`text-sm font-bold ${
                                   t.status === 'DELIVERED' ? 'text-emerald-400' : 
-                                  i === (booking.timeline?.length || 1) - 1 ? 'text-blue-400' : 'text-zinc-300'
+                                  i === (booking.timeline?.length || 1) - 1 ? 'text-blue-400' : 'text-green-800'
                                 }`}>{t.status}</p>
-                                <p className="text-xs text-zinc-500 mt-0.5">{t.description}</p>
+                                <p className="text-xs text-gray-500 mt-0.5">{t.description}</p>
                                 <p className="text-[10px] text-zinc-600 mt-1">{new Date(t.timestamp).toLocaleTimeString()}</p>
                               </div>
                             ))}
@@ -379,10 +379,10 @@ export default function Logistics() {
                     ))}
                     
                     {activeTab === 'my-trucks' && myTrucks.length === 0 && !loading && (
-                      <div className="text-center py-10 bg-zinc-900/50 border border-zinc-800/50 rounded-xl">
+                      <div className="text-center py-10 bg-white/50 border border-green-200/50 rounded-xl">
                         <Package className="h-10 w-10 text-zinc-600 mx-auto mb-3" />
-                        <p className="text-zinc-400 font-medium">No active bookings</p>
-                        <p className="text-xs text-zinc-500 mt-1">Your booked trucks will appear here.</p>
+                        <p className="text-gray-600 font-medium">No active bookings</p>
+                        <p className="text-xs text-gray-500 mt-1">Your booked trucks will appear here.</p>
                       </div>
                     )}
                   </ul>
@@ -406,69 +406,69 @@ export default function Logistics() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <Card className="bg-zinc-900 border-orange-500/30 shadow-xl overflow-hidden relative">
-                <CardHeader className="border-b border-zinc-800">
+              <Card className="bg-white border-orange-500/30 shadow-xl overflow-hidden relative">
+                <CardHeader className="border-b border-green-200">
                   <CardTitle className="text-orange-500 flex items-center gap-2">
                     <Truck className="h-5 w-5" /> Book Truck: {bookingTruck.vehicleNumber}
                   </CardTitle>
-                  <CardDescription className="text-zinc-400">Driver: {bookingTruck.driverName}</CardDescription>
+                  <CardDescription className="text-gray-600">Driver: {bookingTruck.driverName}</CardDescription>
                 </CardHeader>
                 <CardContent className="pt-6">
                   <form onSubmit={handleBookTruck} className="space-y-4">
                     <div className="space-y-2">
-                      <Label className="text-zinc-300">Pickup Location</Label>
+                      <Label className="text-green-800">Pickup Location</Label>
                       <Input 
                         required placeholder="e.g. My Farm, Village XYZ"
                         value={bookingForm.pickupLocation}
                         onChange={(e) => setBookingForm({...bookingForm, pickupLocation: e.target.value})}
-                        className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500" 
+                        className="bg-green-50/50 border-green-200 text-green-950 focus-visible:ring-orange-500" 
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-zinc-300">Destination Mandi</Label>
+                      <Label className="text-green-800">Destination Mandi</Label>
                       <select 
                         required
                         value={bookingForm.destinationMandi}
                         onChange={(e) => setBookingForm({...bookingForm, destinationMandi: e.target.value})}
-                        className="w-full flex h-10 rounded-md border bg-zinc-950/50 border-zinc-800 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                        className="w-full flex h-10 rounded-md border bg-green-50/50 border-green-200 px-3 py-2 text-sm text-green-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
                       >
-                        <option value="" disabled className="bg-zinc-900">Select Mandi...</option>
+                        <option value="" disabled className="bg-white">Select Mandi...</option>
                         {mandis.map(m => (
-                          <option key={m.id} value={m.name} className="bg-zinc-900">{m.name}</option>
+                          <option key={m.id} value={m.name} className="bg-white">{m.name}</option>
                         ))}
                       </select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-zinc-300">Crop Type</Label>
+                        <Label className="text-green-800">Crop Type</Label>
                         <Input 
                           required placeholder="e.g. Wheat"
                           value={bookingForm.cropType}
                           onChange={(e) => setBookingForm({...bookingForm, cropType: e.target.value})}
-                          className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500" 
+                          className="bg-green-50/50 border-green-200 text-green-950 focus-visible:ring-orange-500" 
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-zinc-300">Quantity (Qtl)</Label>
+                        <Label className="text-green-800">Quantity (Qtl)</Label>
                         <Input 
                           required type="number" min="1" max={bookingTruck.capacity}
                           placeholder={`Max ${bookingTruck.capacity}`}
                           value={bookingForm.quantity}
                           onChange={(e) => setBookingForm({...bookingForm, quantity: e.target.value})}
-                          className="bg-zinc-950/50 border-zinc-800 text-white focus-visible:ring-orange-500" 
+                          className="bg-green-50/50 border-green-200 text-green-950 focus-visible:ring-orange-500" 
                         />
                       </div>
                     </div>
                     
-                    <div className="mt-6 pt-4 border-t border-zinc-800 text-sm text-zinc-400">
+                    <div className="mt-6 pt-4 border-t border-green-200 text-sm text-gray-600">
                       Estimated Cost: <span className="text-emerald-400 font-bold ml-1">
                         {bookingForm.quantity ? `₹${(Number(bookingForm.quantity) * bookingTruck.pricePerKm * (bookingTruck.distance || 10)).toFixed(2)}` : 'Enter quantity'}
                       </span>
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                      <Button type="button" variant="outline" onClick={() => setBookingTruck(null)} className="flex-1 border-zinc-700 text-zinc-300">Cancel</Button>
-                      <Button type="submit" disabled={bookingLoading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
+                      <Button type="button" variant="outline" onClick={() => setBookingTruck(null)} className="flex-1 border-green-300 text-green-800">Cancel</Button>
+                      <Button type="submit" disabled={bookingLoading} className="flex-1 bg-orange-500 hover:bg-orange-600 text-green-950">
                         {bookingLoading ? 'Booking...' : 'Confirm Book'}
                       </Button>
                     </div>

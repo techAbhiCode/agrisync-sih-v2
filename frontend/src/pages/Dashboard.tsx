@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import type { Variants } from 'framer-motion';
 import {
   TrendingUp, Users, Sprout, ArrowRight, CalendarDays,
   MapPin, Bell, TicketCheck, Zap, IndianRupee, Clock,
@@ -31,7 +32,7 @@ const statCards = [
     icon: <TrendingUp className="h-5 w-5" />,
     accent: 'text-lime-400',
     ring: 'ring-lime-500/20',
-    bg: 'bg-lime-500/10',
+    bg: 'bg-green-600/10',
   },
   {
     title: 'Active Mandis',
@@ -51,29 +52,21 @@ const statCards = [
     ring: 'ring-sky-500/20',
     bg: 'bg-sky-500/10',
   },
-  {
-    title: 'Queue Wait Time',
-    value: '~8 min',
-    sub: '↓ 73% vs walk-in',
-    icon: <Clock className="h-5 w-5" />,
-    accent: 'text-violet-400',
-    ring: 'ring-violet-500/20',
-    bg: 'bg-violet-500/10',
-  },
+  // The Queue Wait Time stat card will be generated dynamically below
 ];
 
 const quickActions = [
-  { label: 'Book a Slot', icon: <CalendarDays className="h-5 w-5" />, to: '/booking', color: 'bg-lime-500 hover:bg-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)]' },
-  { label: 'Market Trends', icon: <TrendingUp className="h-5 w-5" />, to: '/market-trends', color: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700' },
-  { label: 'Find Mandis', icon: <MapPin className="h-5 w-5" />, to: '/logistics', color: 'bg-zinc-800 hover:bg-zinc-700 text-zinc-100 border border-zinc-700' },
+  { label: 'Book a Slot', icon: <CalendarDays className="h-5 w-5" />, to: '/booking', color: 'bg-green-600 hover:bg-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)]' },
+  { label: 'Market Trends', icon: <TrendingUp className="h-5 w-5" />, to: '/market-trends', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
+  { label: 'Find Mandis', icon: <MapPin className="h-5 w-5" />, to: '/logistics', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
 ];
 
 // Custom chart tooltip
 const ChartTooltip = ({ active, payload, label }: any) => {
   if (active && payload?.length) {
     return (
-      <div className="bg-zinc-900/95 backdrop-blur border border-zinc-700 px-4 py-3 rounded-xl shadow-2xl">
-        <p className="text-zinc-400 text-xs mb-2 font-medium">{label}</p>
+      <div className="bg-white/95 backdrop-blur border border-green-300 px-4 py-3 rounded-xl shadow-2xl">
+        <p className="text-gray-600 text-xs mb-2 font-medium">{label}</p>
         <p className="text-lime-400 text-sm font-semibold">Wheat ₹{payload[0]?.value}/Qtl</p>
         <p className="text-emerald-400 text-sm font-semibold">Paddy ₹{payload[1]?.value}/Qtl</p>
       </div>
@@ -83,11 +76,11 @@ const ChartTooltip = ({ active, payload, label }: any) => {
 };
 
 // ─── Animation variants ───────────────────────────────────────────────────────
-const container = {
+const container: Variants = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.1 } },
 };
-const item = {
+const item: Variants = {
   hidden: { opacity: 0, y: 24 },
   show: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 26 } },
 };
@@ -95,7 +88,7 @@ const item = {
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { user } = useAuthStore();
-  const { bookings, getClosestUpcomingBooking } = useBookingStore();
+  const { getClosestUpcomingBooking } = useBookingStore();
   
   const activeBooking = getClosestUpcomingBooking();
 
@@ -103,10 +96,23 @@ export default function Dashboard() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
 
+  // Dynamic Queue Stat
+  const waitTimeStat = {
+    title: 'Live Queue Status',
+    value: activeBooking?.queuePosition ? `Pos: #${activeBooking.queuePosition}` : 'No Queue',
+    sub: activeBooking?.queuePosition ? `~${activeBooking.queuePosition * 15} min wait time` : 'Book a slot to join',
+    icon: <Clock className="h-5 w-5" />,
+    accent: activeBooking ? 'text-violet-400' : 'text-gray-400',
+    ring: activeBooking ? 'ring-violet-500/20' : 'ring-gray-200',
+    bg: activeBooking ? 'bg-violet-500/10' : 'bg-gray-100',
+  };
+
+  const dynamicStatCards = [...statCards, waitTimeStat];
+
   return (
     <div className="min-h-full relative overflow-hidden">
       {/* Ambient glow */}
-      <div className="absolute top-[-10%] left-[-5%] w-[35%] h-[35%] bg-lime-500/8 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-5%] w-[35%] h-[35%] bg-green-600/8 blur-[120px] rounded-full pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-5%] w-[30%] h-[30%] bg-emerald-500/6 blur-[100px] rounded-full pointer-events-none" />
 
       <motion.div
@@ -118,12 +124,12 @@ export default function Dashboard() {
         {/* ── Header ─────────────────────────────────────────────────────── */}
         <motion.div variants={item} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <p className="text-zinc-500 text-sm font-medium mb-1">{greeting},</p>
-            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-white">
+            <p className="text-gray-500 text-sm font-medium mb-1">{greeting},</p>
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight text-green-950">
               {user?.name ?? 'Farmer'}{' '}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-500">👋</span>
             </h1>
-            <p className="text-zinc-500 text-sm mt-1">
+            <p className="text-gray-500 text-sm mt-1">
               Here's your live market intelligence for today.
             </p>
           </div>
@@ -132,32 +138,32 @@ export default function Dashboard() {
           {activeBooking ? (
             <motion.div
               whileHover={{ scale: 1.02 }}
-              className="flex-shrink-0 bg-zinc-900/70 border border-lime-500/20 rounded-2xl px-5 py-3 flex items-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.08)]"
+              className="flex-shrink-0 bg-white/70 border border-green-500/20 rounded-2xl px-5 py-3 flex items-center gap-3 shadow-[0_0_20px_rgba(132,204,22,0.08)]"
             >
-              <div className="p-2 bg-lime-500/10 rounded-lg">
+              <div className="p-2 bg-green-600/10 rounded-lg">
                 <TicketCheck className="h-5 w-5 text-lime-400" />
               </div>
               <div>
-                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">Active Token</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Active Token</p>
                 <p className="text-lime-400 font-mono font-bold text-lg tracking-widest">{activeBooking.virtualToken}</p>
               </div>
               <div className="flex flex-col items-end gap-0.5 ml-2">
                 <div className="flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 rounded-full bg-lime-500 animate-pulse" />
-                  <span className="text-xs text-lime-500 font-medium">Live</span>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+                  <span className="text-xs text-green-600 font-medium">Live</span>
                 </div>
-                <span className="text-[9px] text-zinc-500">{new Date(activeBooking.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+                <span className="text-[9px] text-gray-500">{new Date(activeBooking.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
               </div>
             </motion.div>
           ) : (
             <motion.div
-              className="flex-shrink-0 bg-zinc-900/70 border border-zinc-800/50 rounded-2xl px-5 py-3 flex items-center gap-3"
+              className="flex-shrink-0 bg-white/70 border border-green-200/50 rounded-2xl px-5 py-3 flex items-center gap-3"
             >
-              <div className="p-2 bg-zinc-800/50 rounded-lg">
-                <TicketCheck className="h-5 w-5 text-zinc-500" />
+              <div className="p-2 bg-green-100/50 rounded-lg">
+                <TicketCheck className="h-5 w-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">No Active Tokens</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">No Active Tokens</p>
                 <p className="text-zinc-600 font-mono font-bold text-sm tracking-widest mt-0.5">Book a slot</p>
               </div>
             </motion.div>
@@ -180,14 +186,14 @@ export default function Dashboard() {
 
         {/* ── Stat Cards ──────────────────────────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((s) => (
+          {dynamicStatCards.map((s) => (
             <motion.div key={s.title} variants={item} whileHover={{ y: -4 }}>
-              <Card className={`bg-zinc-900/40 backdrop-blur border-zinc-800/50 hover:border-zinc-700/50 transition-all ring-1 ${s.ring}`}>
+              <Card className={`bg-white/40 backdrop-blur border-green-200/50 hover:border-green-300/50 transition-all ring-1 ${s.ring}`}>
                 <CardContent className="p-5">
                   <div className={`inline-flex p-2 rounded-lg ${s.bg} ${s.accent} mb-3`}>
                     {s.icon}
                   </div>
-                  <p className="text-xs text-zinc-500 font-medium">{s.title}</p>
+                  <p className="text-xs text-gray-500 font-medium">{s.title}</p>
                   <h4 className={`text-xl font-bold mt-0.5 ${s.accent}`}>{s.value}</h4>
                   <p className="text-xs text-zinc-600 mt-0.5">{s.sub}</p>
                 </CardContent>
@@ -201,9 +207,9 @@ export default function Dashboard() {
 
           {/* Price Trend Chart */}
           <motion.div variants={item} className="lg:col-span-2">
-            <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 shadow-2xl h-full">
+            <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl h-full">
               <CardHeader className="pb-2">
-                <CardTitle className="text-zinc-100 text-base flex items-center gap-2">
+                <CardTitle className="text-green-950 text-base flex items-center gap-2">
                   <IndianRupee className="h-4 w-4 text-lime-400" />
                   5-Year Commodity Price Trend (₹/Quintal)
                 </CardTitle>
@@ -233,10 +239,10 @@ export default function Dashboard() {
                 </div>
                 {/* Legend */}
                 <div className="flex gap-5 mt-3">
-                  <div className="flex items-center gap-1.5 text-xs text-zinc-400">
-                    <div className="w-3 h-0.5 bg-lime-500 rounded-full" />Wheat
+                  <div className="flex items-center gap-1.5 text-xs text-gray-600">
+                    <div className="w-3 h-0.5 bg-green-600 rounded-full" />Wheat
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-zinc-400">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-600">
                     <div className="w-3 h-0.5 bg-emerald-500 rounded-full" />Paddy
                   </div>
                 </div>
@@ -259,10 +265,10 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-lime-400 font-bold text-sm mb-1">AI Insight: Bullish Signal</p>
-                  <p className="text-zinc-500 text-xs leading-relaxed">
+                  <p className="text-gray-500 text-xs leading-relaxed">
                     Wheat prices predicted to rise 4.5% next quarter. Lower rainfall forecast is the key driver.
                   </p>
-                  <Link to="/market-trends" className="inline-flex items-center gap-1 text-xs text-lime-500 hover:text-lime-400 mt-2 font-medium transition-colors">
+                  <Link to="/market-trends" className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-lime-400 mt-2 font-medium transition-colors">
                     View Analysis <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
@@ -277,7 +283,7 @@ export default function Dashboard() {
                 </div>
                 <div>
                   <p className="text-orange-400 font-bold text-sm mb-1">Spoilage Alert</p>
-                  <p className="text-zinc-500 text-xs leading-relaxed">
+                  <p className="text-gray-500 text-xs leading-relaxed">
                     High humidity in cluster B. Expedite Paddy liquidation within 14 days.
                   </p>
                 </div>
@@ -302,7 +308,7 @@ export default function Dashboard() {
               <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
                 <Link
                   to="/booking?tab=upcoming"
-                  className="flex items-center justify-center gap-2 w-full bg-zinc-900 border border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800 text-zinc-300 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
+                  className="flex items-center justify-center gap-2 w-full bg-white border border-green-200 hover:border-green-300 hover:bg-green-50 text-green-800 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
                 >
                   <TicketCheck className="h-4 w-4" />
                   Check all your bookings
@@ -314,9 +320,9 @@ export default function Dashboard() {
 
         {/* ── Recent Activity ─────────────────────────────────────────────── */}
         <motion.div variants={item}>
-          <Card className="bg-zinc-900/40 backdrop-blur-xl border-zinc-800/50 shadow-xl">
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-xl">
             <CardHeader className="pb-3">
-              <CardTitle className="text-zinc-100 text-base flex items-center gap-2">
+              <CardTitle className="text-green-950 text-base flex items-center gap-2">
                 <Bell className="h-4 w-4 text-lime-400" />
                 Recent Activity
               </CardTitle>
@@ -324,13 +330,13 @@ export default function Dashboard() {
             <CardContent>
               <div className="space-y-3">
                 {[
-                  { icon: <CheckCircle2 className="h-4 w-4 text-lime-500" />, text: 'Booking TK-8492 confirmed at Kanpur Central', time: '2h ago' },
-                  { icon: <IndianRupee className="h-4 w-4 text-emerald-500" />, text: '₹12,400 credited for 50 qtl Paddy — Akbarpur Mandi', time: '1d ago' },
+                  { icon: <CheckCircle2 className="h-4 w-4 text-green-600" />, text: 'Booking TK-8492 confirmed at Kanpur Central', time: '2h ago' },
+                  { icon: <IndianRupee className="h-4 w-4 text-green-700" />, text: '₹12,400 credited for 50 qtl Paddy — Akbarpur Mandi', time: '1d ago' },
                   { icon: <TrendingUp className="h-4 w-4 text-sky-500" />, text: 'Wheat price alert triggered — 4.5% surge detected', time: '2d ago' },
                 ].map((a, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-800/20 hover:bg-zinc-800/40 transition-colors">
-                    <div className="p-1.5 bg-zinc-800 rounded-lg flex-shrink-0">{a.icon}</div>
-                    <p className="text-sm text-zinc-300 flex-1">{a.text}</p>
+                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-green-100/20 hover:bg-green-100/40 transition-colors">
+                    <div className="p-1.5 bg-green-50 rounded-lg flex-shrink-0">{a.icon}</div>
+                    <p className="text-sm text-green-800 flex-1">{a.text}</p>
                     <span className="text-xs text-zinc-600 flex-shrink-0">{a.time}</span>
                   </div>
                 ))}

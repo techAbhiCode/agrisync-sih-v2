@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { QrCode, CheckCircle2, XCircle, Loader2, LayoutDashboard, Keyboard, Clock, Users, ArrowRight, TicketCheck } from 'lucide-react';
+import { QrCode, CheckCircle2, XCircle, Loader2, LayoutDashboard, Keyboard, Clock, Users, TicketCheck } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { scanBooking, getMandiDashboardStats } from '@/lib/api';
@@ -59,7 +59,7 @@ export default function MandiDashboard() {
       
       setScanState({ 
         status: 'success', 
-        message: 'Gate Entry Confirmed!',
+        message: response.message || 'Status Updated Successfully!',
         data: response.booking
       });
 
@@ -110,57 +110,57 @@ export default function MandiDashboard() {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-white mb-1 flex items-center gap-3">
-            <LayoutDashboard className="h-8 w-8 text-lime-500" /> Mandi Command Center
+          <h1 className="text-3xl font-extrabold tracking-tight text-green-950 mb-1 flex items-center gap-3">
+            <LayoutDashboard className="h-8 w-8 text-green-600" /> Mandi Command Center
           </h1>
-          <p className="text-zinc-400">Manage arrivals, scan tickets, and track gate entries.</p>
+          <p className="text-gray-600">Manage arrivals, scan tickets, and track gate entries.</p>
         </div>
       </div>
 
       {/* Analytics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-xl">
+        <Card className="bg-white/60 border-green-200 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Expected Today</p>
-                <h3 className="text-3xl font-bold text-white mt-1">{loadingStats ? '-' : stats.expectedToday}</h3>
+                <p className="text-sm font-medium text-gray-600">Expected Today</p>
+                <h3 className="text-3xl font-bold text-green-950 mt-1">{loadingStats ? '-' : stats.expectedToday}</h3>
               </div>
               <div className="p-3 bg-blue-500/10 rounded-xl"><Users className="h-5 w-5 text-blue-500" /></div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-xl">
+        <Card className="bg-white/60 border-green-200 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Completed Today</p>
-                <h3 className="text-3xl font-bold text-white mt-1">{loadingStats ? '-' : stats.completedToday}</h3>
+                <p className="text-sm font-medium text-gray-600">Completed Today</p>
+                <h3 className="text-3xl font-bold text-green-950 mt-1">{loadingStats ? '-' : stats.completedToday}</h3>
               </div>
-              <div className="p-3 bg-lime-500/10 rounded-xl"><CheckCircle2 className="h-5 w-5 text-lime-500" /></div>
+              <div className="p-3 bg-green-600/10 rounded-xl"><CheckCircle2 className="h-5 w-5 text-green-600" /></div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-xl">
+        <Card className="bg-white/60 border-green-200 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Pending Today</p>
-                <h3 className="text-3xl font-bold text-white mt-1">{loadingStats ? '-' : stats.pendingToday}</h3>
+                <p className="text-sm font-medium text-gray-600">Pending Today</p>
+                <h3 className="text-3xl font-bold text-green-950 mt-1">{loadingStats ? '-' : stats.pendingToday}</h3>
               </div>
               <div className="p-3 bg-amber-500/10 rounded-xl"><Clock className="h-5 w-5 text-amber-500" /></div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-zinc-900/60 border-zinc-800 backdrop-blur-xl">
+        <Card className="bg-white/60 border-green-200 backdrop-blur-xl">
           <CardContent className="p-6">
             <div className="flex justify-between items-start">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Total All-Time</p>
-                <h3 className="text-3xl font-bold text-white mt-1">{loadingStats ? '-' : stats.totalScanned}</h3>
+                <p className="text-sm font-medium text-gray-600">Total All-Time</p>
+                <h3 className="text-3xl font-bold text-green-950 mt-1">{loadingStats ? '-' : stats.totalScanned}</h3>
               </div>
               <div className="p-3 bg-purple-500/10 rounded-xl"><TicketCheck className="h-5 w-5 text-purple-500" /></div>
             </div>
@@ -171,11 +171,11 @@ export default function MandiDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8">
         {/* Main Processing Area */}
         <div className="space-y-4">
-          <div className="flex bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800/80">
+          <div className="flex bg-white/50 p-1.5 rounded-xl border border-green-200/80">
             <button
               onClick={() => setActiveTab('scanner')}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                activeTab === 'scanner' ? 'bg-zinc-800 text-lime-400 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                activeTab === 'scanner' ? 'bg-green-50 text-lime-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
               <QrCode className="h-4 w-4" /> QR Scanner
@@ -183,14 +183,14 @@ export default function MandiDashboard() {
             <button
               onClick={() => setActiveTab('manual')}
               className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-medium rounded-lg transition-all ${
-                activeTab === 'manual' ? 'bg-zinc-800 text-lime-400 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                activeTab === 'manual' ? 'bg-green-50 text-lime-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
               <Keyboard className="h-4 w-4" /> Manual Entry
             </button>
           </div>
 
-          <Card className="bg-zinc-900 border-zinc-800 shadow-2xl overflow-hidden relative min-h-[400px]">
+          <Card className="bg-white border-green-200 shadow-2xl overflow-hidden relative min-h-[400px]">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-lime-500 to-emerald-600 z-10"></div>
             <CardContent className="p-0 h-full flex flex-col">
               
@@ -205,14 +205,14 @@ export default function MandiDashboard() {
                       <div className="w-full h-full">
                         <Scanner
                           onScan={handleScan}
-                          components={{ audio: true, finder: true }}
+                          components={{ finder: true }}
                           styles={{ container: { width: '100%', height: '100%' }, video: { objectFit: 'cover' } }}
                         />
-                        <div className="absolute inset-0 border-[3px] border-lime-500/30 m-8 rounded-3xl pointer-events-none"></div>
+                        <div className="absolute inset-0 border-[3px] border-green-500/30 m-8 rounded-3xl pointer-events-none"></div>
                         <motion.div 
                           animate={{ top: ['10%', '90%', '10%'] }}
                           transition={{ duration: 3, ease: "linear", repeat: Infinity }}
-                          className="absolute left-8 right-8 h-1 bg-lime-500/50 blur-[2px] pointer-events-none"
+                          className="absolute left-8 right-8 h-1 bg-green-600/50 blur-[2px] pointer-events-none"
                         />
                       </div>
                     ) : (
@@ -230,11 +230,11 @@ export default function MandiDashboard() {
                     {!isScannerPaused ? (
                       <div className="w-full max-w-sm space-y-6">
                         <div className="text-center">
-                          <div className="bg-zinc-800/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Keyboard className="h-8 w-8 text-zinc-400" />
+                          <div className="bg-green-100/50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Keyboard className="h-8 w-8 text-gray-600" />
                           </div>
-                          <h3 className="text-xl font-bold text-white mb-2">Enter Token Manually</h3>
-                          <p className="text-sm text-zinc-400">If QR code is unreadable, enter the virtual token number below.</p>
+                          <h3 className="text-xl font-bold text-green-950 mb-2">Enter Token Manually</h3>
+                          <p className="text-sm text-gray-600">If QR code is unreadable, enter the virtual token number below.</p>
                         </div>
                         <form onSubmit={handleManualSubmit} className="space-y-4">
                           <input 
@@ -243,9 +243,9 @@ export default function MandiDashboard() {
                             required
                             value={manualToken}
                             onChange={(e) => setManualToken(e.target.value.toUpperCase())}
-                            className="w-full px-4 py-3 bg-zinc-950 border border-zinc-800 rounded-xl text-center text-xl font-mono text-white focus:outline-none focus:ring-2 focus:ring-lime-500 uppercase tracking-widest"
+                            className="w-full px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-center text-xl font-mono text-green-950 focus:outline-none focus:ring-2 focus:ring-lime-500 uppercase tracking-widest"
                           />
-                          <button type="submit" disabled={!manualToken.trim()} className="w-full bg-lime-500 hover:bg-lime-600 disabled:bg-zinc-800 disabled:text-zinc-500 text-zinc-950 font-bold py-3 rounded-xl transition-all">
+                          <button type="submit" disabled={!manualToken.trim()} className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-50 disabled:text-gray-500 text-zinc-950 font-bold py-3 rounded-xl transition-all">
                             Verify Token
                           </button>
                         </form>
@@ -258,10 +258,10 @@ export default function MandiDashboard() {
               </AnimatePresence>
 
               {activeTab === 'scanner' && (
-                <div className="bg-zinc-950 p-4 flex items-center justify-between border-t border-zinc-900">
+                <div className="bg-green-50 p-4 flex items-center justify-between border-t border-zinc-900">
                   <div className="flex items-center gap-3">
-                    <div className={`w-3 h-3 rounded-full ${scanState.status === 'error' ? 'bg-red-500 animate-pulse' : scanState.status === 'success' ? 'bg-lime-500' : 'bg-blue-500 animate-pulse'}`}></div>
-                    <span className="text-sm font-medium text-zinc-400">
+                    <div className={`w-3 h-3 rounded-full ${scanState.status === 'error' ? 'bg-red-500 animate-pulse' : scanState.status === 'success' ? 'bg-green-600' : 'bg-blue-500 animate-pulse'}`}></div>
+                    <span className="text-sm font-medium text-gray-600">
                       {scanState.status === 'idle' ? 'Point camera at QR Code' : 
                        scanState.status === 'loading' ? 'Processing...' : 
                        scanState.status === 'success' ? 'Ready for next' : 'Retrying soon'}
@@ -275,11 +275,11 @@ export default function MandiDashboard() {
 
         {/* Activity Log */}
         <div className="space-y-4">
-          <div className="flex bg-zinc-900/50 p-1.5 rounded-xl border border-zinc-800/80 mb-2">
+          <div className="flex bg-white/50 p-1.5 rounded-xl border border-green-200/80 mb-2">
             <button
               onClick={() => setLogTab('pending')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
-                logTab === 'pending' ? 'bg-zinc-800 text-amber-400 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                logTab === 'pending' ? 'bg-green-50 text-amber-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
               <Clock className="h-4 w-4" /> Expected Today
@@ -287,30 +287,30 @@ export default function MandiDashboard() {
             <button
               onClick={() => setLogTab('recent')}
               className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
-                logTab === 'recent' ? 'bg-zinc-800 text-emerald-400 shadow-sm' : 'text-zinc-400 hover:text-zinc-200'
+                logTab === 'recent' ? 'bg-green-50 text-emerald-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
               <CheckCircle2 className="h-4 w-4" /> Recent Scans
             </button>
           </div>
 
-          <div className="bg-zinc-900/60 border border-zinc-800/80 rounded-2xl p-2 max-h-[480px] overflow-y-auto custom-scrollbar">
+          <div className="bg-white/60 border border-green-200/80 rounded-2xl p-2 max-h-[480px] overflow-y-auto custom-scrollbar">
             {logTab === 'recent' ? (
               recentScans.length === 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-zinc-500 text-sm">No recent scans today.</p>
+                  <p className="text-gray-500 text-sm">No recent scans today.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {recentScans.map((scan) => (
-                    <div key={scan._id} className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800/50 flex items-center justify-between">
+                    <div key={scan._id} className="p-3 bg-green-50/50 rounded-xl border border-green-200/50 flex items-center justify-between">
                       <div>
                         <p className="text-lime-400 font-mono text-sm font-bold tracking-wider">{scan.virtualToken}</p>
-                        <p className="text-xs text-zinc-500 mt-1">{scan.cropType} • {scan.quantity} Qtl</p>
+                        <p className="text-xs text-gray-500 mt-1">{scan.cropType} • {scan.quantity} Qtl</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest font-semibold">
-                          Verified
+                        <span className="text-[10px] text-green-700 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase tracking-widest font-semibold">
+                          {scan.status || 'Verified'}
                         </span>
                         <p className="text-[10px] text-zinc-600 mt-1">
                           {new Date(scan.updatedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
@@ -323,21 +323,21 @@ export default function MandiDashboard() {
             ) : (
               pendingBookings.length === 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-zinc-500 text-sm">No pending tokens for today.</p>
+                  <p className="text-gray-500 text-sm">No pending tokens for today.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
                   {pendingBookings.map((b) => (
-                    <div key={b._id} className="p-3 bg-zinc-950/50 rounded-xl border border-zinc-800/50 flex items-center justify-between">
+                    <div key={b._id} className="p-3 bg-green-50/50 rounded-xl border border-green-200/50 flex items-center justify-between">
                       <div>
                         <p className="text-amber-400 font-mono text-sm font-bold tracking-wider">{b.virtualToken}</p>
-                        <p className="text-xs text-zinc-500 mt-1">{b.cropType} • {b.quantity} Qtl</p>
+                        <p className="text-xs text-gray-500 mt-1">{b.cropType} • {b.quantity} Qtl</p>
                       </div>
                       <div className="text-right flex flex-col items-end">
                         <span className="text-[10px] text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-widest font-semibold mb-1">
                           Expected
                         </span>
-                        <p className="text-[10px] text-zinc-400">
+                        <p className="text-[10px] text-gray-600">
                           {b.timeSlot?.split(' - ')[0] || b.timeSlot}
                         </p>
                       </div>
@@ -356,25 +356,25 @@ export default function MandiDashboard() {
 // Reusable Overlay for processing states
 function ProcessingOverlay({ scanState }: { scanState: ScanResult }) {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-zinc-950/90 backdrop-blur-md z-20">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-green-50/90 backdrop-blur-md z-20">
       {scanState.status === 'loading' && (
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
-          <Loader2 className="h-16 w-16 text-lime-500 animate-spin mb-4" />
-          <p className="text-zinc-300 font-semibold">Verifying Token...</p>
+          <Loader2 className="h-16 w-16 text-green-600 animate-spin mb-4" />
+          <p className="text-green-800 font-semibold">Verifying Token...</p>
         </motion.div>
       )}
       
       {scanState.status === 'success' && (
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center text-center">
-          <div className="w-24 h-24 bg-lime-500/20 rounded-full flex items-center justify-center mb-4 border border-lime-500/30">
-            <CheckCircle2 className="h-12 w-12 text-lime-500" />
+          <div className="w-24 h-24 bg-green-600/20 rounded-full flex items-center justify-center mb-4 border border-green-500/30">
+            <CheckCircle2 className="h-12 w-12 text-green-600" />
           </div>
-          <h3 className="text-2xl font-bold text-white mb-2">{scanState.message}</h3>
+          <h3 className="text-2xl font-bold text-green-950 mb-2">{scanState.message}</h3>
           {scanState.data && (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-4 mt-2 text-left w-full shadow-lg">
-              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Booking Verified</p>
+            <div className="bg-white border border-green-200 rounded-xl p-4 mt-2 text-left w-full shadow-lg">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Booking Verified</p>
               <p className="text-xl font-bold text-lime-400 font-mono tracking-widest">{scanState.data.virtualToken}</p>
-              <p className="text-sm text-zinc-300 mt-2">{scanState.data.cropType} • {scanState.data.quantity} Qtl</p>
+              <p className="text-sm text-green-800 mt-2">{scanState.data.cropType} • {scanState.data.quantity} Qtl</p>
             </div>
           )}
         </motion.div>
@@ -385,7 +385,7 @@ function ProcessingOverlay({ scanState }: { scanState: ScanResult }) {
           <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mb-4 border border-red-500/30">
             <XCircle className="h-12 w-12 text-red-500" />
           </div>
-          <h3 className="text-xl font-bold text-white mb-2">Verification Failed</h3>
+          <h3 className="text-xl font-bold text-green-950 mb-2">Verification Failed</h3>
           <p className="text-red-400 max-w-xs">{scanState.message}</p>
         </motion.div>
       )}

@@ -21,7 +21,7 @@ interface NotificationState {
   clearAll: () => Promise<void>;
 }
 
-export const useNotificationStore = create<NotificationState>()((set, get) => ({
+export const useNotificationStore = create<NotificationState>()((set) => ({
   notifications: [],
   
   fetchNotifications: async () => {

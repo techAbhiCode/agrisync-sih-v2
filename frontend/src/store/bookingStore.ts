@@ -11,6 +11,7 @@ export interface Booking {
   timeSlot: string;
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
   virtualToken: string;
+  queuePosition?: number;
   createdAt: string;
 }
 

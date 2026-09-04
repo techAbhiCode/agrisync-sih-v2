@@ -15,12 +15,9 @@ class UserService {
         isUpdated = true;
       }
       if (reqBody.role && user.role !== reqBody.role) {
-        const allowedInitialRoles = ['FARMER', 'MANDI_ADMIN', 'BUYER', 'LOGISTICS'];
+        const allowedInitialRoles = ['FARMER', 'BUYER', 'LOGISTICS'];
         if (allowedInitialRoles.includes(reqBody.role.toUpperCase())) {
           user.role = reqBody.role.toUpperCase();
-          if (user.role === 'MANDI_ADMIN' && reqBody.mandiId) {
-            user.mandiId = reqBody.mandiId;
-          }
           isUpdated = true;
         }
       }
@@ -34,7 +31,7 @@ class UserService {
     // Create new user
     const { email: reqEmail, name: reqName, role, mandiId, profileData } = reqBody;
     
-    const allowedInitialRoles = ['FARMER', 'MANDI_ADMIN', 'BUYER', 'LOGISTICS'];
+    const allowedInitialRoles = ['FARMER', 'BUYER', 'LOGISTICS'];
     let finalRole = 'FARMER';
     if (role && allowedInitialRoles.includes(role.toUpperCase())) {
       finalRole = role.toUpperCase();

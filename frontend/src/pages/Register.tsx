@@ -11,7 +11,8 @@ import {
   updateProfile,
 } from 'firebase/auth';
 import { useAuthStore } from '@/store/authStore';
-import api, { syncUserProfile } from '@/lib/api';
+import api, { syncUserProfile, submitMandiRequest } from '@/lib/api';
+import { toast } from 'sonner';
 
 const CROP_OPTIONS = [
   'Wheat', 'Rice / Paddy', 'Maize / Corn', 'Sugarcane',
@@ -40,6 +41,8 @@ export default function Register() {
   const [role, setRole] = useState<'FARMER' | 'MANDI_ADMIN'>('FARMER');
   const [mandiId, setMandiId] = useState('');
   const [customMandiName, setCustomMandiName] = useState('');
+  const [licenseNumber, setLicenseNumber] = useState('');
+  const [governmentId, setGovernmentId] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -69,6 +72,8 @@ export default function Register() {
       if (!category) { setError('Please select a farmer category.'); return; }
     } else if (role === 'MANDI_ADMIN') {
       if (!mandiId) { setError('Please select an assigned Mandi.'); return; }
+      if (!licenseNumber) { setError('Please enter your license number.'); return; }
+      if (!governmentId) { setError('Please enter your government ID.'); return; }
     }
     setError('');
     setStep(2);
@@ -91,8 +96,7 @@ export default function Register() {
       const syncResponse = await syncUserProfile({
         name: fullName,
         email: user.email!,
-        role,
-        mandiId: role === 'MANDI_ADMIN' ? finalMandiId : undefined,
+        role: 'FARMER',
         profileData: {
           phone,
           location,
@@ -101,14 +105,26 @@ export default function Register() {
         }
       });
       
-      const dbUser = syncResponse.user;
-      login({ 
-        id: user.uid, 
-        name: dbUser.name, 
-        email: dbUser.email, 
-        role: dbUser.role, 
-        mandiId: dbUser.mandiId 
-      });
+      if (role === 'MANDI_ADMIN') {
+        await submitMandiRequest({
+          mandiName: finalMandiId,
+          location: location,
+          licenseNumber,
+          governmentId
+        });
+      }
+
+      if (syncResponse.user) {
+        login({ 
+          id: user.uid, 
+          name: syncResponse.user.name, 
+          email: syncResponse.user.email, 
+          role: syncResponse.user.role, 
+          mandiId: syncResponse.user.mandiId 
+        });
+        toast.success(role === 'MANDI_ADMIN' ? 'Registration successful! Your Mandi Admin request is pending.' : 'Registration successful!');
+      }
+      
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
       const msg: Record<string, string> = {
@@ -122,9 +138,21 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-[#09090b] flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-lime-500/20 blur-[150px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-green-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Image & Pattern */}
+      <div
+        className="pointer-events-none absolute inset-0 z-0 opacity-30"
+        style={{
+          backgroundImage: 'url(/src/assets/auth_bg.jpg)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      />
+      <div className="pointer-events-none absolute inset-0 z-0 bg-farm-pattern opacity-50 mix-blend-multiply" />
+
+      {/* Background cinematic glowing orbs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-green-600/20 blur-[150px] rounded-full pointer-events-none z-0" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 blur-[120px] rounded-full pointer-events-none z-0" />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}
@@ -134,21 +162,21 @@ export default function Register() {
       >
         {/* Logo */}
         <div className="flex flex-col items-center mb-6">
-          <div className="bg-lime-500/10 p-3 rounded-full mb-4 ring-1 ring-lime-500/30 shadow-[0_0_30px_rgba(132,204,22,0.2)]">
-            <Sprout className="h-8 w-8 text-lime-500" />
+          <div className="bg-green-600/10 p-3 rounded-full mb-4 ring-1 ring-lime-500/30 shadow-[0_0_30px_rgba(132,204,22,0.2)]">
+            <Sprout className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">AgriSync.</h1>
-          <p className="text-zinc-400 mt-1 text-sm">Create your farmer account</p>
+          <h1 className="text-3xl font-extrabold text-green-950 tracking-tight">AgriSync.</h1>
+          <p className="text-gray-600 mt-1 text-sm">Create your farmer account</p>
         </div>
 
         {/* Step bar */}
         <div className="flex items-center gap-3 mb-5">
-          <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-lime-500' : 'bg-zinc-800'}`} />
-          <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-lime-500' : 'bg-zinc-800'}`} />
-          <span className="text-xs text-zinc-500 shrink-0">Step {step} / 2</span>
+          <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-green-600' : 'bg-green-50'}`} />
+          <div className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-green-600' : 'bg-green-50'}`} />
+          <span className="text-xs text-gray-500 shrink-0">Step {step} / 2</span>
         </div>
 
-        <div className="bg-zinc-900/60 backdrop-blur-xl border border-zinc-800 rounded-xl shadow-2xl p-6">
+        <div className="bg-white/60 backdrop-blur-xl border border-green-200 rounded-xl shadow-2xl p-6">
           <AnimatePresence>
             {error && (
               <motion.div
@@ -172,81 +200,81 @@ export default function Register() {
               onSubmit={handleStep1}
               className="space-y-4"
             >
-              <h2 className="text-base font-semibold text-zinc-100 mb-1">Personal Information</h2>
+              <h2 className="text-base font-semibold text-green-950 mb-1">Personal Information</h2>
 
               {/* Profile Photo */}
               <div className="flex flex-col items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
-                  className="relative w-20 h-20 rounded-full bg-zinc-800 border-2 border-dashed border-zinc-700 hover:border-lime-500 transition-colors overflow-hidden group"
+                  className="relative w-20 h-20 rounded-full bg-green-50 border-2 border-dashed border-green-300 hover:border-green-500 transition-colors overflow-hidden group"
                 >
                   {photoPreview ? (
                     <img src={photoPreview} alt="Profile preview" className="w-full h-full object-cover" />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full">
-                      <Camera className="h-6 w-6 text-zinc-500 group-hover:text-lime-500 transition-colors" />
+                      <Camera className="h-6 w-6 text-gray-500 group-hover:text-green-600 transition-colors" />
                     </div>
                   )}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <Camera className="h-5 w-5 text-white" />
+                    <Camera className="h-5 w-5 text-green-950" />
                   </div>
                 </button>
-                <span className="text-xs text-zinc-500">Profile Photo (optional)</span>
+                <span className="text-xs text-gray-500">Profile Photo (optional)</span>
                 <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
               </div>
 
               {/* Full Name */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Full Name</label>
+                <label className="text-sm text-green-800 font-medium">Full Name</label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                  <User className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <input
                     type="text" placeholder="Ramesh Kumar Patel" required
                     value={fullName} onChange={(e) => setFullName(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-green-500/50 transition-all"
                   />
                 </div>
               </div>
 
               {/* Phone */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Phone Number</label>
+                <label className="text-sm text-green-800 font-medium">Phone Number</label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
-                  <span className="absolute left-9 top-2.5 text-zinc-500 text-sm border-r border-zinc-700 pr-2.5">+91</span>
+                  <Phone className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
+                  <span className="absolute left-9 top-2.5 text-gray-500 text-sm border-r border-green-300 pr-2.5">+91</span>
                   <input
                     type="tel" placeholder="98765 43210" required maxLength={10} pattern="[6-9][0-9]{9}"
                     value={phone} onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
-                    className="w-full pl-20 pr-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all"
+                    className="w-full pl-20 pr-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-green-500/50 transition-all"
                   />
                 </div>
               </div>
 
               {/* Location */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Village / District / State</label>
+                <label className="text-sm text-green-800 font-medium">Village / District / State</label>
                 <div className="relative">
-                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <input
                     type="text" placeholder="Anandpur, Jaipur, Rajasthan" required
                     value={location} onChange={(e) => setLocation(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-green-500/50 transition-all"
                   />
                 </div>
               </div>
 
               {/* Role */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Your Role</label>
+                <label className="text-sm text-green-800 font-medium">Your Role</label>
                 <div className="grid grid-cols-2 gap-3">
                   <button type="button" onClick={() => setRole('FARMER')}
-                    className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${role === 'FARMER' ? 'border-lime-500 bg-lime-500/10 text-lime-400' : 'border-zinc-800 bg-zinc-950/40 text-zinc-400'}`}
+                    className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${role === 'FARMER' ? 'border-green-500 bg-green-600/10 text-lime-400' : 'border-green-200 bg-green-50/40 text-gray-600'}`}
                   >
                     <span className="text-sm font-semibold">Farmer</span>
                   </button>
                   <button type="button" onClick={() => setRole('MANDI_ADMIN')}
-                    className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${role === 'MANDI_ADMIN' ? 'border-lime-500 bg-lime-500/10 text-lime-400' : 'border-zinc-800 bg-zinc-950/40 text-zinc-400'}`}
+                    className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${role === 'MANDI_ADMIN' ? 'border-green-500 bg-green-600/10 text-lime-400' : 'border-green-200 bg-green-50/40 text-gray-600'}`}
                   >
                     <span className="text-sm font-semibold">Mandi Admin</span>
                   </button>
@@ -258,10 +286,10 @@ export default function Register() {
                 {role === 'MANDI_ADMIN' && (
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-3 overflow-hidden">
                     <div className="space-y-1.5">
-                      <label className="text-sm text-zinc-300 font-medium">Select Assigned Mandi</label>
+                      <label className="text-sm text-green-800 font-medium">Select Assigned Mandi</label>
                       <select
                         value={mandiId === 'OTHER' ? 'OTHER' : mandiId} onChange={(e) => setMandiId(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
+                        className="w-full px-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
                         required={role === 'MANDI_ADMIN' && mandiId !== 'OTHER'}
                       >
                         <option value="">Select a Mandi...</option>
@@ -277,16 +305,36 @@ export default function Register() {
                     <AnimatePresence>
                       {mandiId === 'OTHER' && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                          <label className="text-sm text-zinc-300 font-medium mb-1.5 block">Custom Mandi Name</label>
+                          <label className="text-sm text-green-800 font-medium mb-1.5 block">Custom Mandi Name</label>
                           <input
                             type="text" placeholder="e.g. Unnao Sub Mandi" required
                             value={customMandiName}
                             onChange={(e) => setCustomMandiName(e.target.value)}
-                            className="w-full px-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
+                            className="w-full px-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
                           />
                         </motion.div>
                       )}
                     </AnimatePresence>
+                    
+                    <div className="space-y-1.5">
+                      <label className="text-sm text-green-800 font-medium">Mandi License Number</label>
+                      <input
+                        type="text" placeholder="e.g. M-12345" required={role === 'MANDI_ADMIN'}
+                        value={licenseNumber}
+                        onChange={(e) => setLicenseNumber(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
+                      />
+                    </div>
+                    
+                    <div className="space-y-1.5">
+                      <label className="text-sm text-green-800 font-medium">Government ID (Aadhar/PAN)</label>
+                      <input
+                        type="text" placeholder="Your Govt ID" required={role === 'MANDI_ADMIN'}
+                        value={governmentId}
+                        onChange={(e) => setGovernmentId(e.target.value)}
+                        className="w-full px-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50"
+                      />
+                    </div>
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -297,25 +345,25 @@ export default function Register() {
                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
                     {/* Crop Type */}
                     <div className="space-y-1.5">
-                      <label className="text-sm text-zinc-300 font-medium">Primary Crop Type</label>
+                      <label className="text-sm text-green-800 font-medium">Primary Crop Type</label>
                       <div className="relative">
                         <button
                           type="button" onClick={() => setCropOpen((o) => !o)}
-                          className="w-full flex items-center justify-between px-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 transition-all"
+                          className="w-full flex items-center justify-between px-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 transition-all"
                         >
-                          <span className={cropType ? 'text-white' : 'text-zinc-600'}>{cropType || 'Select crop…'}</span>
-                          <ChevronDown className={`h-4 w-4 text-zinc-500 transition-transform ${cropOpen ? 'rotate-180' : ''}`} />
+                          <span className={cropType ? 'text-green-950' : 'text-zinc-600'}>{cropType || 'Select crop…'}</span>
+                          <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${cropOpen ? 'rotate-180' : ''}`} />
                         </button>
                         <AnimatePresence>
                           {cropOpen && (
                             <motion.div
                               initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-                              className="absolute z-20 mt-1 w-full bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl overflow-auto max-h-44"
+                              className="absolute z-20 mt-1 w-full bg-white border border-green-200 rounded-lg shadow-xl overflow-auto max-h-44"
                             >
                               {CROP_OPTIONS.map((c) => (
                                 <button key={c} type="button"
                                   onClick={() => { setCropType(c); setCropOpen(false); }}
-                                  className={`w-full text-left px-4 py-2 text-sm hover:bg-zinc-800 transition-colors ${cropType === c ? 'text-lime-400' : 'text-zinc-300'}`}
+                                  className={`w-full text-left px-4 py-2 text-sm hover:bg-green-50 transition-colors ${cropType === c ? 'text-lime-400' : 'text-green-800'}`}
                                 >{c}</button>
                               ))}
                             </motion.div>
@@ -326,15 +374,15 @@ export default function Register() {
 
                     {/* Farmer Category */}
                     <div className="space-y-1.5">
-                      <label className="text-sm text-zinc-300 font-medium">Farmer Category</label>
+                      <label className="text-sm text-green-800 font-medium">Farmer Category</label>
                       <div className="grid grid-cols-3 gap-2">
                         {CATEGORY_OPTIONS.map((opt) => (
                           <button key={opt.value} type="button" onClick={() => setCategory(opt.value)}
-                            className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${category === opt.value ? 'border-lime-500 bg-lime-500/10 text-lime-400' : 'border-zinc-800 bg-zinc-950/40 text-zinc-400 hover:border-zinc-700'}`}
+                            className={`flex flex-col items-center py-3 px-2 rounded-lg border text-center transition-all ${category === opt.value ? 'border-green-500 bg-green-600/10 text-lime-400' : 'border-green-200 bg-green-50/40 text-gray-600 hover:border-green-300'}`}
                           >
                             <span className="text-xs font-semibold">{opt.label}</span>
                             <span className="text-[10px] mt-0.5 opacity-60">{opt.sub}</span>
-                            {category === opt.value && <CheckCircle2 className="h-3 w-3 mt-1 text-lime-500" />}
+                            {category === opt.value && <CheckCircle2 className="h-3 w-3 mt-1 text-green-600" />}
                           </button>
                         ))}
                       </div>
@@ -344,7 +392,7 @@ export default function Register() {
               </AnimatePresence>
 
               <button type="submit"
-                className="w-full mt-2 py-2.5 bg-lime-500 hover:bg-lime-600 text-zinc-950 font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)] transition-all"
+                className="w-full mt-2 py-2.5 bg-green-600 hover:bg-green-700 text-zinc-950 font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)] transition-all"
               >
                 Continue <ArrowRight className="h-4 w-4" />
               </button>
@@ -362,40 +410,40 @@ export default function Register() {
             >
               <div className="flex items-center gap-3 mb-1">
                 <button type="button" onClick={() => { setError(''); setStep(1); }}
-                  className="text-zinc-500 hover:text-zinc-200 text-xs transition-colors"
+                  className="text-gray-500 hover:text-green-900 text-xs transition-colors"
                 >← Back</button>
-                <h2 className="text-base font-semibold text-zinc-100">Account Credentials</h2>
+                <h2 className="text-base font-semibold text-green-950">Account Credentials</h2>
               </div>
 
               {/* Email */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Email Address</label>
+                <label className="text-sm text-green-800 font-medium">Email Address</label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                  <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <input type="email" placeholder="ramesh@example.com" required
                     value={email} onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all"
+                    className="w-full pl-10 pr-4 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-green-500/50 transition-all"
                   />
                 </div>
               </div>
 
               {/* Password */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Password</label>
+                <label className="text-sm text-green-800 font-medium">Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <input type={showPassword ? 'text' : 'password'} placeholder="Min. 8 characters" required minLength={8}
                     value={password} onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-10 py-2.5 bg-zinc-950/50 border border-zinc-800 rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-lime-500/50 transition-all"
+                    className="w-full pl-10 pr-10 py-2.5 bg-green-50/50 border border-green-200 rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 focus:ring-lime-500/50 focus:border-green-500/50 transition-all"
                   />
                   <button type="button" onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-green-800 transition-colors"
                   >{showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                 </div>
                 {password.length > 0 && (
                   <div className="flex gap-1">
                     {[2, 4, 6, 8].map((threshold) => (
-                      <div key={threshold} className={`h-1 flex-1 rounded-full transition-all ${password.length >= threshold ? (passwordStrong ? 'bg-lime-500' : 'bg-yellow-500') : 'bg-zinc-800'}`} />
+                      <div key={threshold} className={`h-1 flex-1 rounded-full transition-all ${password.length >= threshold ? (passwordStrong ? 'bg-green-600' : 'bg-yellow-500') : 'bg-green-50'}`} />
                     ))}
                   </div>
                 )}
@@ -403,15 +451,15 @@ export default function Register() {
 
               {/* Confirm Password */}
               <div className="space-y-1.5">
-                <label className="text-sm text-zinc-300 font-medium">Confirm Password</label>
+                <label className="text-sm text-green-800 font-medium">Confirm Password</label>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-3 h-4 w-4 text-zinc-500" />
+                  <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-500" />
                   <input type={showConfirm ? 'text' : 'password'} placeholder="Re-enter password" required
                     value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`w-full pl-10 pr-10 py-2.5 bg-zinc-950/50 border rounded-lg text-white placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 transition-all ${passwordsMatch ? 'border-zinc-800 focus:ring-lime-500/50 focus:border-lime-500/50' : 'border-red-500/60 focus:ring-red-500/30'}`}
+                    className={`w-full pl-10 pr-10 py-2.5 bg-green-50/50 border rounded-lg text-green-950 placeholder-zinc-600 text-sm focus:outline-none focus:ring-2 transition-all ${passwordsMatch ? 'border-green-200 focus:ring-lime-500/50 focus:border-green-500/50' : 'border-red-500/60 focus:ring-red-500/30'}`}
                   />
                   <button type="button" onClick={() => setShowConfirm((v) => !v)}
-                    className="absolute right-3 top-3 text-zinc-500 hover:text-zinc-300 transition-colors"
+                    className="absolute right-3 top-3 text-gray-500 hover:text-green-800 transition-colors"
                   >{showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}</button>
                 </div>
                 {!passwordsMatch && confirmPassword.length > 0 && (
@@ -420,8 +468,8 @@ export default function Register() {
               </div>
 
               {/* Summary */}
-              <div className="bg-zinc-800/40 rounded-lg p-3 space-y-1.5 text-xs text-zinc-400">
-                <p className="text-zinc-300 font-medium">Summary</p>
+              <div className="bg-green-100/40 rounded-lg p-3 space-y-1.5 text-xs text-gray-600">
+                <p className="text-green-800 font-medium">Summary</p>
                 {[
                   ['Name', fullName],
                   ['Phone', phone ? `+91 ${phone}` : '—'],
@@ -431,23 +479,23 @@ export default function Register() {
                 ].map(([label, val]) => (
                   <div key={label} className="flex justify-between gap-2">
                     <span>{label}</span>
-                    <span className="text-zinc-200 truncate max-w-[55%] text-right">{val || '—'}</span>
+                    <span className="text-green-900 truncate max-w-[55%] text-right">{val || '—'}</span>
                   </div>
                 ))}
               </div>
 
               <button type="submit"
                 disabled={isLoading || !passwordsMatch || !passwordStrong}
-                className="w-full py-2.5 bg-lime-500 hover:bg-lime-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)] transition-all"
+                className="w-full py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-bold rounded-lg text-sm flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)] transition-all"
               >
                 {isLoading ? <span className="animate-pulse">Creating Account…</span> : <><span>Create Account</span><ArrowRight className="h-4 w-4" /></>}
               </button>
             </motion.form>
           )}
 
-          <p className="text-center text-xs text-zinc-500 mt-5">
+          <p className="text-center text-xs text-gray-500 mt-5">
             Already have an account?{' '}
-            <Link to="/login" className="text-lime-500 hover:text-lime-400 font-medium transition-colors">Sign in</Link>
+            <Link to="/login" className="text-green-600 hover:text-lime-400 font-medium transition-colors">Sign in</Link>
           </p>
         </div>
       </motion.div>

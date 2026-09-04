@@ -36,13 +36,13 @@ class BookingController {
     res.json(bookings);
   }
 
-  async scanToken(req, res) {
+  async updateStatus(req, res) {
     try {
-      const { virtualToken } = req.body;
-      const updatedBooking = await bookingService.scanToken(req.user.uid, virtualToken);
+      const { virtualToken, newStatus } = req.body;
+      const updatedBooking = await bookingService.updateBookingStatus(req.user.uid, virtualToken, newStatus);
       res.status(200).json({
         success: true,
-        message: 'Token verified successfully',
+        message: 'Status updated successfully',
         booking: updatedBooking
       });
     } catch (error) {
@@ -55,11 +55,14 @@ class BookingController {
       if (error.message.startsWith('MANDI_MISMATCH:')) {
         return res.status(400).json({ error: error.message.replace('MANDI_MISMATCH: ', '') });
       }
+      if (error.message.startsWith('INVALID_STATE:')) {
+        return res.status(400).json({ error: error.message.replace('INVALID_STATE: ', '') });
+      }
       if (error.message.startsWith('ALREADY_USED:') || error.message.startsWith('REJECTED:')) {
         return res.status(400).json({ error: error.message.split(': ')[1] });
       }
-      console.error('Error scanning booking:', error);
-      res.status(500).json({ error: 'Failed to process scan' });
+      console.error('Error updating booking status:', error);
+      res.status(500).json({ error: 'Failed to process update' });
     }
   }
 

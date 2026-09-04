@@ -1,18 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sun, Cloud, CloudRain, CloudLightning, Wind, Droplets, MapPin, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 // Open-Meteo WMO Weather interpretation codes
 const getWeatherDetails = (code: number) => {
   if (code === 0) return { label: 'Clear sky', icon: <Sun className="h-10 w-10 text-yellow-400" /> };
-  if (code === 1 || code === 2 || code === 3) return { label: 'Partly cloudy', icon: <Cloud className="h-10 w-10 text-zinc-300" /> };
-  if (code >= 45 && code <= 48) return { label: 'Fog', icon: <Cloud className="h-10 w-10 text-zinc-400" /> };
+  if (code === 1 || code === 2 || code === 3) return { label: 'Partly cloudy', icon: <Cloud className="h-10 w-10 text-green-800" /> };
+  if (code >= 45 && code <= 48) return { label: 'Fog', icon: <Cloud className="h-10 w-10 text-gray-600" /> };
   if (code >= 51 && code <= 67) return { label: 'Rain', icon: <CloudRain className="h-10 w-10 text-blue-400" /> };
-  if (code >= 71 && code <= 77) return { label: 'Snow', icon: <Cloud className="h-10 w-10 text-white" /> };
+  if (code >= 71 && code <= 77) return { label: 'Snow', icon: <Cloud className="h-10 w-10 text-green-950" /> };
   if (code >= 80 && code <= 82) return { label: 'Showers', icon: <CloudRain className="h-10 w-10 text-blue-500" /> };
   if (code >= 95) return { label: 'Thunderstorm', icon: <CloudLightning className="h-10 w-10 text-purple-400" /> };
-  return { label: 'Unknown', icon: <Cloud className="h-10 w-10 text-zinc-400" /> };
+  return { label: 'Unknown', icon: <Cloud className="h-10 w-10 text-gray-600" /> };
 };
 
 interface WeatherData {
@@ -77,7 +76,7 @@ export default function WeatherWidget() {
 
   if (loading) {
     return (
-      <Card className="bg-zinc-900/60 backdrop-blur-xl border-zinc-800 shadow-xl h-full flex items-center justify-center min-h-[220px]">
+      <Card className="bg-white/60 backdrop-blur-xl border-green-200 shadow-xl h-full flex items-center justify-center min-h-[220px]">
         <Loader2 className="h-8 w-8 text-sky-500 animate-spin" />
       </Card>
     );
@@ -97,22 +96,22 @@ export default function WeatherWidget() {
         {/* Top: Location & Current Weather */}
         <div className="flex justify-between items-start mb-4">
           <div>
-            <div className="flex items-center gap-1.5 text-zinc-400 text-xs font-medium mb-2">
+            <div className="flex items-center gap-1.5 text-gray-600 text-xs font-medium mb-2">
               <MapPin className="h-3.5 w-3.5 text-sky-400" />
               {locationName}
             </div>
             <div className="flex items-center gap-3">
               {currentDetails.icon}
               <div>
-                <div className="text-4xl font-black text-white tracking-tighter">
-                  {weather.temp}°<span className="text-2xl text-zinc-500 font-bold tracking-normal">C</span>
+                <div className="text-4xl font-black text-green-950 tracking-tighter">
+                  {weather.temp}°<span className="text-2xl text-gray-500 font-bold tracking-normal">C</span>
                 </div>
-                <div className="text-sm font-medium text-sky-400">{currentDetails.label}</div>
+                <div className="text-sm font-medium text-gray-700">{currentDetails.label}</div>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col gap-2 text-xs font-medium text-zinc-400 bg-zinc-950/30 p-2.5 rounded-xl border border-white/5">
+          <div className="flex flex-col gap-2 text-xs font-medium text-gray-600 bg-green-50/30 p-2.5 rounded-xl border border-white/5">
             <div className="flex items-center gap-2">
               <Droplets className="h-3.5 w-3.5 text-blue-400" />
               {weather.humidity}%
@@ -130,11 +129,11 @@ export default function WeatherWidget() {
             {weather.forecast.map((day, i) => {
               const details = getWeatherDetails(day.code);
               return (
-                <div key={i} className="flex flex-col items-center bg-zinc-950/30 p-2 rounded-lg border border-white/5">
-                  <span className="text-xs text-zinc-400 mb-1">{day.day}</span>
+                <div key={i} className="flex flex-col items-center bg-green-50/30 p-2 rounded-lg border border-white/5">
+                  <span className="text-xs text-gray-600 mb-1">{day.day}</span>
                   <div className="scale-75 mb-1">{details.icon}</div>
-                  <div className="text-xs font-bold text-zinc-200">
-                    {day.max}° <span className="text-zinc-500 font-normal">{day.min}°</span>
+                  <div className="text-xs font-bold text-green-900">
+                    {day.max}° <span className="text-gray-500 font-normal">{day.min}°</span>
                   </div>
                 </div>
               );

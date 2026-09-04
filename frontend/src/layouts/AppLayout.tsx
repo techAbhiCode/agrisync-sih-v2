@@ -64,29 +64,29 @@ export default function AppLayout() {
   ].filter(link => user && link.roles.includes(user.role));
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-zinc-50 font-sans selection:bg-lime-500/30">
+    <div className="min-h-screen bg-green-50 bg-farm-pattern text-green-950 font-sans selection:bg-green-600/30">
       
       {/* 
         The Glassmorphic Floating Top Navbar 
         Cinematic transparency with backdrop-blur
       */}
-      <header className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-center pointer-events-none">
+      <header className="fixed top-0 left-0 right-0 z-50 px-2 sm:px-6 py-2 sm:py-4 flex justify-center pointer-events-none">
         <motion.nav 
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="pointer-events-auto bg-zinc-900/60 backdrop-blur-xl border border-zinc-800/50 shadow-[0_8px_30px_rgb(0,0,0,0.5)] rounded-full px-6 py-2 flex items-center justify-between w-full max-w-5xl"
+          className="pointer-events-auto bg-yellow-100/90 backdrop-blur-xl border border-green-500 shadow-sm rounded-full px-3 sm:px-6 py-2 flex items-center justify-between w-[96%] max-w-5xl"
         >
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 mr-8 group">
-            <div className="bg-lime-500/10 p-2 rounded-full group-hover:bg-lime-500/20 transition-colors">
-              <Sprout className="h-5 w-5 text-lime-500" />
+          <Link to="/" className="flex items-center gap-2 mr-2 sm:mr-8 group shrink-0">
+            <div className="bg-green-600/10 p-2 rounded-full group-hover:bg-green-600/20 transition-colors">
+              <Sprout className="h-5 w-5 text-green-700" />
             </div>
-            <span className="text-lg font-bold text-white tracking-tight">AgriSync.</span>
+            <span className="hidden lg:inline-block text-lg font-bold text-green-950 tracking-tight">AgriSync.</span>
           </Link>
 
           {/* Animated Navigation Links */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar flex-1 justify-center mask-image-edges">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -97,8 +97,8 @@ export default function AppLayout() {
                   onMouseLeave={() => setHoveredPath(null)}
                   className="relative px-4 py-2 rounded-full text-sm font-medium transition-colors z-10 flex items-center gap-2"
                 >
-                  <link.icon className={`h-4 w-4 z-10 relative transition-colors ${isActive ? 'text-zinc-950' : 'text-zinc-400'}`} />
-                  <span className={`z-10 relative transition-colors ${isActive ? 'text-zinc-950' : 'text-zinc-300'}`}>
+                  <link.icon className={`h-4 w-4 z-10 relative transition-colors ${isActive ? 'text-zinc-950' : 'text-gray-600'}`} />
+                  <span className={`z-10 relative transition-colors hidden md:inline-block whitespace-nowrap ${isActive ? 'text-zinc-950' : 'text-green-800'}`}>
                     {link.name}
                   </span>
 
@@ -106,7 +106,7 @@ export default function AppLayout() {
                   {isActive && (
                     <motion.div
                       layoutId="activePill"
-                      className="absolute inset-0 bg-lime-500 rounded-full shadow-[0_0_15px_rgba(132,204,22,0.4)]"
+                      className="absolute inset-0 bg-green-600 rounded-full shadow-[0_0_15px_rgba(132,204,22,0.4)]"
                       transition={{ type: "spring", stiffness: 300, damping: 25 }}
                     />
                   )}
@@ -115,7 +115,7 @@ export default function AppLayout() {
                   {hoveredPath === link.path && !isActive && (
                     <motion.div
                       layoutId="hoverPill"
-                      className="absolute inset-0 bg-zinc-800/50 rounded-full"
+                      className="absolute inset-0 bg-green-100/50 rounded-full"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -128,20 +128,20 @@ export default function AppLayout() {
           </div>
 
           {/* Right: Notifications + User Profile + Logout */}
-          <div className="flex items-center gap-2 ml-6 pl-6 border-l border-zinc-700/50">
+          <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-green-300/50 shrink-0">
             {/* Notification Bell */}
             <NotificationPanel />
 
             {/* User info */}
-            <Link to="/profile" className="hidden sm:flex flex-col items-end ml-1 px-2 py-1 hover:bg-zinc-800/50 rounded-lg transition-colors cursor-pointer">
+            <Link to="/profile" className="hidden sm:flex flex-col items-end ml-1 px-2 py-1 hover:bg-green-100/50 rounded-lg transition-colors cursor-pointer">
               <span className="text-xs font-semibold text-lime-400 uppercase tracking-wider">{user?.role}</span>
-              <span className="text-sm font-medium text-zinc-300">{user?.name}</span>
+              <span className="text-sm font-medium text-green-800">{user?.name}</span>
             </Link>
 
             {/* Logout */}
             <button 
               onClick={handleLogout}
-              className="p-2 rounded-full hover:bg-zinc-800/80 text-zinc-400 hover:text-red-400 transition-colors"
+              className="p-2 rounded-full hover:bg-green-100/80 text-gray-600 hover:text-red-400 transition-colors"
               title="Sign out"
             >
               <LogOut className="h-5 w-5" />

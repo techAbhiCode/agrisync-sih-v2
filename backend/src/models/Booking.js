@@ -37,7 +37,7 @@ const bookingSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['PENDING', 'APPROVED', 'REJECTED', 'COMPLETED'],
+    enum: ['PENDING', 'APPROVED', 'AT_GATE', 'WEIGHING', 'PAYMENT', 'COMPLETED', 'REJECTED', 'CANCELLED'],
     default: 'PENDING'
   },
   virtualToken: {

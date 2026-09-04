@@ -12,8 +12,8 @@ router.post('/', verifyToken, bookingController.createBooking);
 // Get user's bookings
 router.get('/', verifyToken, bookingController.getUserBookings);
 
-// Scan a booking token (For Mandi Admins)
-router.put('/scan', verifyToken, bookingController.scanToken);
+// Update booking status (For Mandi Admins)
+router.put('/status', verifyToken, bookingController.updateStatus);
 
 // Get Mandi Dashboard Stats & Recent Scans
 router.get('/mandi/dashboard', verifyToken, bookingController.getMandiDashboard);

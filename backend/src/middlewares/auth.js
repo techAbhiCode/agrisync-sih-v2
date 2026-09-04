@@ -1,11 +1,22 @@
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getAuth } = require('firebase-admin/auth');
-const serviceAccount = require('../../config/serviceAccountKey.json');
+let serviceAccount;
+try {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } else {
+    serviceAccount = require('../../config/serviceAccountKey.json');
+  }
+} catch (error) {
+  console.error("Error loading Firebase Service Account:", error);
+}
 
 // Initialize Admin SDK with the new modular syntax
-initializeApp({
-  credential: cert(serviceAccount)
-});
+if (serviceAccount) {
+  initializeApp({
+    credential: cert(serviceAccount)
+  });
+}
 
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split('Bearer ')[1];

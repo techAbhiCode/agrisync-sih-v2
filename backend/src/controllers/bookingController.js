@@ -78,6 +78,57 @@ class BookingController {
       res.status(500).json({ error: 'Failed to fetch mandi dashboard data' });
     }
   }
+
+  async getSlotAvailability(req, res) {
+    try {
+      const { mandiId, date } = req.query;
+      if (!mandiId) {
+        return res.status(400).json({ error: 'Mandi ID is required' });
+      }
+      const result = await bookingService.getSlotAvailability(mandiId, date);
+      res.status(200).json({ success: true, capacity: result.capacity, availability: result.slots });
+    } catch (error) {
+      if (error.message.startsWith('VALIDATION:')) {
+        return res.status(400).json({ error: error.message.replace('VALIDATION: ', '') });
+      }
+      console.error('Error fetching slot availability:', error);
+      res.status(500).json({ error: 'Failed to fetch slot availability' });
+    }
+  }
+
+  async verifyBooking(req, res) {
+    try {
+      const { virtualToken } = req.body;
+      const booking = await bookingService.verifyBooking(virtualToken);
+      res.status(200).json({ success: true, message: 'Scan successful: Time window is valid', booking });
+    } catch (error) {
+      if (error.message.startsWith('NOT_FOUND:')) {
+        return res.status(404).json({ error: error.message.replace('NOT_FOUND: ', '') });
+      }
+      if (error.message.startsWith('INVALID_SCAN_TIME:')) {
+        return res.status(403).json({ error: error.message.replace('INVALID_SCAN_TIME: ', '') });
+      }
+      console.error('Error verifying booking:', error);
+      res.status(500).json({ error: 'Failed to verify booking time' });
+    }
+  }
+
+  async reportDelay(req, res) {
+    try {
+      const { virtualToken, delayReason, currentLocation } = req.body;
+      const updatedBooking = await bookingService.reportDelay(req.user.uid, virtualToken, delayReason, currentLocation);
+      res.status(200).json({ success: true, message: 'Delay reported successfully', booking: updatedBooking });
+    } catch (error) {
+      if (error.message.startsWith('NOT_FOUND:')) {
+        return res.status(404).json({ error: error.message.replace('NOT_FOUND: ', '') });
+      }
+      if (error.message.startsWith('FORBIDDEN:')) {
+        return res.status(403).json({ error: error.message.replace('FORBIDDEN: ', '') });
+      }
+      console.error('Error reporting delay:', error);
+      res.status(500).json({ error: 'Failed to report delay' });
+    }
+  }
 }
 
 module.exports = new BookingController();

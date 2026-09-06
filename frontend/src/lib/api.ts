@@ -3,7 +3,7 @@ import { auth } from './firebase';
 
 // Setup base instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5000/api',
 });
 
 // Interceptor: Har request se pehle yeh function chalega
@@ -134,12 +134,46 @@ export const scanBooking = async (virtualToken: string, newStatus?: string) => {
   }
 };
 
+export const verifyBookingTime = async (virtualToken: string) => {
+  try {
+    const response = await api.post('/bookings/verify', { virtualToken });
+    return response.data;
+  } catch (error) {
+    console.error('Error verifying booking time', error);
+    throw error;
+  }
+};
+
+export const reportDelay = async (virtualToken: string, delayReason: string, currentLocation?: any) => {
+  try {
+    const response = await api.post('/bookings/report-delay', { virtualToken, delayReason, currentLocation });
+    return response.data;
+  } catch (error) {
+    console.error('Error reporting delay', error);
+    throw error;
+  }
+};
+
 export const getMandiDashboardStats = async () => {
   try {
     const response = await api.get('/bookings/mandi/dashboard');
     return response.data;
   } catch (error) {
     console.error('Error fetching mandi dashboard stats', error);
+    throw error;
+  }
+};
+
+export const getSlotAvailability = async (mandiId: string, date?: string) => {
+  try {
+    let url = `/bookings/slots/availability?mandiId=${encodeURIComponent(mandiId)}`;
+    if (date) {
+      url += `&date=${encodeURIComponent(date)}`;
+    }
+    const response = await api.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching slot availability', error);
     throw error;
   }
 };

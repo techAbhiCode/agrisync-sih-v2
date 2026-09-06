@@ -88,6 +88,30 @@ class BookingRepository {
     // Position is number of people ahead + 1
     return position + 1;
   }
+
+  async getSlotBookings(mandiId, preferredDate) {
+    const startOfDay = new Date(preferredDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+
+    const result = await Booking.aggregate([
+      {
+        $match: {
+          mandiId: mandiId,
+          preferredDate: { $gte: startOfDay, $lt: endOfDay },
+          status: { $nin: ['REJECTED', 'CANCELLED'] }
+        }
+      },
+      {
+        $group: {
+          _id: '$timeSlot',
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+    return result;
+  }
 }
 
 module.exports = new BookingRepository();

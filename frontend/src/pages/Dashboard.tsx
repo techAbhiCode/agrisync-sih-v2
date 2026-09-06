@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import type { Variants } from 'framer-motion';
@@ -11,8 +12,10 @@ import { useAuthStore } from '@/store/authStore';
 import { useBookingStore } from '@/store/bookingStore';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, LineChart, Line
 } from 'recharts';
 import WeatherWidget from '@/components/WeatherWidget';
+import { useTranslation } from 'react-i18next';
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const priceData = [
@@ -24,42 +27,7 @@ const priceData = [
   { year: '2026', wheat: 2500, paddy: 2450 },
 ];
 
-const statCards = [
-  {
-    title: 'Live Market',
-    value: 'Bullish',
-    sub: '+4.5% this week',
-    icon: <TrendingUp className="h-5 w-5" />,
-    accent: 'text-lime-400',
-    ring: 'ring-lime-500/20',
-    bg: 'bg-green-600/10',
-  },
-  {
-    title: 'Active Mandis',
-    value: '14 Open',
-    sub: 'Nearest: 2.4 km',
-    icon: <Users className="h-5 w-5" />,
-    accent: 'text-emerald-400',
-    ring: 'ring-emerald-500/20',
-    bg: 'bg-emerald-500/10',
-  },
-  {
-    title: 'Crop Health AI',
-    value: 'Optimal',
-    sub: 'No spoilage detected',
-    icon: <Sprout className="h-5 w-5" />,
-    accent: 'text-sky-400',
-    ring: 'ring-sky-500/20',
-    bg: 'bg-sky-500/10',
-  },
-  // The Queue Wait Time stat card will be generated dynamically below
-];
-
-const quickActions = [
-  { label: 'Book a Slot', icon: <CalendarDays className="h-5 w-5" />, to: '/booking', color: 'bg-green-600 hover:bg-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)]' },
-  { label: 'Market Trends', icon: <TrendingUp className="h-5 w-5" />, to: '/market-trends', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
-  { label: 'Find Mandis', icon: <MapPin className="h-5 w-5" />, to: '/logistics', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
-];
+// Cards will be generated inside the component to access translations
 
 // Custom chart tooltip
 const ChartTooltip = ({ active, payload, label }: any) => {
@@ -87,20 +55,58 @@ const item: Variants = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Dashboard() {
+  const { t } = useTranslation();
   const { user } = useAuthStore();
   const { getClosestUpcomingBooking } = useBookingStore();
+  const [chartType, setChartType] = useState<'area' | 'bar' | 'line'>('area');
   
   const activeBooking = getClosestUpcomingBooking();
 
   // Greeting based on time of day
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const greeting = hour < 12 ? t('dashboard.greeting.morning') : hour < 17 ? t('dashboard.greeting.afternoon') : t('dashboard.greeting.evening');
+
+  const statCards = [
+    {
+      title: t('dashboard.stats.market.title'),
+      value: t('dashboard.stats.market.value'),
+      sub: t('dashboard.stats.market.sub'),
+      icon: <TrendingUp className="h-5 w-5" />,
+      accent: 'text-lime-400',
+      ring: 'ring-lime-500/20',
+      bg: 'bg-green-600/10',
+    },
+    {
+      title: t('dashboard.stats.mandis.title'),
+      value: t('dashboard.stats.mandis.value'),
+      sub: t('dashboard.stats.mandis.sub'),
+      icon: <Users className="h-5 w-5" />,
+      accent: 'text-emerald-400',
+      ring: 'ring-emerald-500/20',
+      bg: 'bg-emerald-500/10',
+    },
+    {
+      title: t('dashboard.stats.health.title'),
+      value: t('dashboard.stats.health.value'),
+      sub: t('dashboard.stats.health.sub'),
+      icon: <Sprout className="h-5 w-5" />,
+      accent: 'text-sky-400',
+      ring: 'ring-sky-500/20',
+      bg: 'bg-sky-500/10',
+    },
+  ];
+  
+  const quickActions = [
+    { label: t('dashboard.quickActions.book'), icon: <CalendarDays className="h-5 w-5" />, to: '/booking', color: 'bg-green-600 hover:bg-lime-400 text-zinc-950 shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)]' },
+    { label: t('dashboard.quickActions.trends'), icon: <TrendingUp className="h-5 w-5" />, to: '/market-trends', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
+    { label: t('dashboard.quickActions.mandis'), icon: <MapPin className="h-5 w-5" />, to: '/logistics', color: 'bg-green-50 hover:bg-green-100 text-green-950 border border-green-300' },
+  ];
 
   // Dynamic Queue Stat
   const waitTimeStat = {
-    title: 'Live Queue Status',
-    value: activeBooking?.queuePosition ? `Pos: #${activeBooking.queuePosition}` : 'No Queue',
-    sub: activeBooking?.queuePosition ? `~${activeBooking.queuePosition * 15} min wait time` : 'Book a slot to join',
+    title: t('dashboard.stats.queue.title'),
+    value: activeBooking?.queuePosition ? t('dashboard.stats.queue.pos', { pos: activeBooking.queuePosition }) : t('dashboard.stats.queue.noQueue'),
+    sub: activeBooking?.queuePosition ? t('dashboard.stats.queue.wait', { wait: activeBooking.queuePosition * 15 }) : t('dashboard.stats.queue.bookToJoin'),
     icon: <Clock className="h-5 w-5" />,
     accent: activeBooking ? 'text-violet-400' : 'text-gray-400',
     ring: activeBooking ? 'ring-violet-500/20' : 'ring-gray-200',
@@ -130,7 +136,7 @@ export default function Dashboard() {
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-500">👋</span>
             </h1>
             <p className="text-gray-500 text-sm mt-1">
-              Here's your live market intelligence for today.
+              {t('dashboard.subtitle')}
             </p>
           </div>
 
@@ -144,13 +150,13 @@ export default function Dashboard() {
                 <TicketCheck className="h-5 w-5 text-lime-400" />
               </div>
               <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">Active Token</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">{t('dashboard.activeToken')}</p>
                 <p className="text-lime-400 font-mono font-bold text-lg tracking-widest">{activeBooking.virtualToken}</p>
               </div>
               <div className="flex flex-col items-end gap-0.5 ml-2">
                 <div className="flex items-center gap-1">
                   <div className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
-                  <span className="text-xs text-green-600 font-medium">Live</span>
+                  <span className="text-xs text-green-600 font-medium">{t('dashboard.live')}</span>
                 </div>
                 <span className="text-[9px] text-gray-500">{new Date(activeBooking.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
               </div>
@@ -163,8 +169,8 @@ export default function Dashboard() {
                 <TicketCheck className="h-5 w-5 text-gray-500" />
               </div>
               <div>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">No Active Tokens</p>
-                <p className="text-zinc-600 font-mono font-bold text-sm tracking-widest mt-0.5">Book a slot</p>
+                <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold">{t('dashboard.noActiveToken')}</p>
+                <p className="text-zinc-600 font-mono font-bold text-sm tracking-widest mt-0.5">{t('dashboard.bookSlot')}</p>
               </div>
             </motion.div>
           )}
@@ -208,33 +214,58 @@ export default function Dashboard() {
           {/* Price Trend Chart */}
           <motion.div variants={item} className="lg:col-span-2">
             <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl h-full">
-              <CardHeader className="pb-2">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
                 <CardTitle className="text-green-950 text-base flex items-center gap-2">
                   <IndianRupee className="h-4 w-4 text-lime-400" />
-                  5-Year Commodity Price Trend (₹/Quintal)
+                  {t('dashboard.charts.title')}
                 </CardTitle>
+                <div className="flex bg-white/50 p-1 rounded-lg border border-green-200">
+                  <button onClick={() => setChartType('area')} className={`px-2 py-1 text-xs rounded-md font-medium transition-colors ${chartType === 'area' ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-green-800'}`}>Area</button>
+                  <button onClick={() => setChartType('bar')} className={`px-2 py-1 text-xs rounded-md font-medium transition-colors ${chartType === 'bar' ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-green-800'}`}>Bar</button>
+                  <button onClick={() => setChartType('line')} className={`px-2 py-1 text-xs rounded-md font-medium transition-colors ${chartType === 'line' ? 'bg-green-600 text-white' : 'text-gray-500 hover:text-green-800'}`}>Line</button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="h-[260px] mt-2">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={priceData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="gWheat" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#84cc16" stopOpacity={0.25} />
-                          <stop offset="95%" stopColor="#84cc16" stopOpacity={0} />
-                        </linearGradient>
-                        <linearGradient id="gPaddy" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
-                          <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
-                      <XAxis dataKey="year" stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} />
-                      <YAxis stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} domain={['dataMin - 100', 'dataMax + 100']} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Area type="monotone" dataKey="wheat" stroke="#84cc16" strokeWidth={2.5} fill="url(#gWheat)" />
-                      <Area type="monotone" dataKey="paddy" stroke="#10b981" strokeWidth={2.5} fill="url(#gPaddy)" />
-                    </AreaChart>
+                    {chartType === 'area' ? (
+                      <AreaChart data={priceData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="gWheat" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#84cc16" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#84cc16" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="gPaddy" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.25} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                        <XAxis dataKey="year" stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} />
+                        <YAxis stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} domain={['dataMin - 100', 'dataMax + 100']} />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Area type="monotone" dataKey="wheat" stroke="#84cc16" strokeWidth={2.5} fill="url(#gWheat)" />
+                        <Area type="monotone" dataKey="paddy" stroke="#10b981" strokeWidth={2.5} fill="url(#gPaddy)" />
+                      </AreaChart>
+                    ) : chartType === 'bar' ? (
+                      <BarChart data={priceData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                        <XAxis dataKey="year" stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} />
+                        <YAxis stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} domain={['dataMin - 100', 'dataMax + 100']} />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Bar dataKey="wheat" fill="#84cc16" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="paddy" fill="#10b981" radius={[4, 4, 0, 0]} />
+                      </BarChart>
+                    ) : (
+                      <LineChart data={priceData} margin={{ top: 4, right: 10, left: -10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                        <XAxis dataKey="year" stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} />
+                        <YAxis stroke="#52525b" tick={{ fill: '#71717a', fontSize: 11 }} domain={['dataMin - 100', 'dataMax + 100']} />
+                        <Tooltip content={<ChartTooltip />} />
+                        <Line type="monotone" dataKey="wheat" stroke="#84cc16" strokeWidth={3} dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="paddy" stroke="#10b981" strokeWidth={3} dot={{ r: 4 }} />
+                      </LineChart>
+                    )}
                   </ResponsiveContainer>
                 </div>
                 {/* Legend */}
@@ -264,12 +295,12 @@ export default function Dashboard() {
                   <Zap className="h-5 w-5 text-lime-400" />
                 </div>
                 <div>
-                  <p className="text-lime-400 font-bold text-sm mb-1">AI Insight: Bullish Signal</p>
+                  <p className="text-lime-400 font-bold text-sm mb-1">{t('dashboard.advisory.bullish.title')}</p>
                   <p className="text-gray-500 text-xs leading-relaxed">
-                    Wheat prices predicted to rise 4.5% next quarter. Lower rainfall forecast is the key driver.
+                    {t('dashboard.advisory.bullish.desc')}
                   </p>
                   <Link to="/market-trends" className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-lime-400 mt-2 font-medium transition-colors">
-                    View Analysis <ArrowRight className="h-3 w-3" />
+                    {t('dashboard.advisory.bullish.link')} <ArrowRight className="h-3 w-3" />
                   </Link>
                 </div>
               </CardContent>
@@ -282,9 +313,9 @@ export default function Dashboard() {
                   <AlertTriangle className="h-5 w-5 text-orange-400" />
                 </div>
                 <div>
-                  <p className="text-orange-400 font-bold text-sm mb-1">Spoilage Alert</p>
+                  <p className="text-orange-400 font-bold text-sm mb-1">{t('dashboard.advisory.spoilage.title')}</p>
                   <p className="text-gray-500 text-xs leading-relaxed">
-                    High humidity in cluster B. Expedite Paddy liquidation within 14 days.
+                    {t('dashboard.advisory.spoilage.desc')}
                   </p>
                 </div>
               </CardContent>
@@ -299,7 +330,7 @@ export default function Dashboard() {
                 >
                   <div className="flex items-center gap-2">
                     <CalendarDays className="h-5 w-5" />
-                    Book Your Next Slot
+                    {t('dashboard.bookingCta.new')}
                   </div>
                   <ArrowRight className="h-5 w-5" />
                 </Link>
@@ -311,7 +342,7 @@ export default function Dashboard() {
                   className="flex items-center justify-center gap-2 w-full bg-white border border-green-200 hover:border-green-300 hover:bg-green-50 text-green-800 font-semibold text-sm px-5 py-3 rounded-xl transition-all"
                 >
                   <TicketCheck className="h-4 w-4" />
-                  Check all your bookings
+                  {t('dashboard.bookingCta.check')}
                 </Link>
               </motion.div>
             </div>
@@ -324,7 +355,7 @@ export default function Dashboard() {
             <CardHeader className="pb-3">
               <CardTitle className="text-green-950 text-base flex items-center gap-2">
                 <Bell className="h-4 w-4 text-lime-400" />
-                Recent Activity
+                {t('dashboard.activity.title')}
               </CardTitle>
             </CardHeader>
             <CardContent>

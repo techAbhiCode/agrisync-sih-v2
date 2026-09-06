@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { QrCode, CheckCircle2, XCircle, Loader2, LayoutDashboard, Keyboard, Clock, Users, TicketCheck } from 'lucide-react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { Card, CardContent } from '@/components/ui/card';
-import { scanBooking, getMandiDashboardStats } from '@/lib/api';
+import { scanBooking, getMandiDashboardStats, verifyBookingTime } from '@/lib/api';
 
 interface ScanResult {
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -26,7 +26,7 @@ export default function MandiDashboard() {
   const [recentScans, setRecentScans] = useState<any[]>([]);
   const [pendingBookings, setPendingBookings] = useState<any[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
-  const [logTab, setLogTab] = useState<'recent' | 'pending'>('pending');
+  const [logTab, setLogTab] = useState<'recent' | 'pending' | 'delayed'>('pending');
 
   const fetchStats = async () => {
     try {
@@ -53,8 +53,13 @@ export default function MandiDashboard() {
   const processToken = async (tokenNumber: string) => {
     try {
       setIsScannerPaused(true);
-      setScanState({ status: 'loading' });
+      setScanState({ status: 'loading', message: 'Verifying time window...' });
 
+      // Step 1: Strict Time Verification
+      await verifyBookingTime(tokenNumber);
+
+      setScanState({ status: 'loading', message: 'Updating status...' });
+      // Step 2: Actually process the scan
       const response = await scanBooking(tokenNumber);
       
       setScanState({ 
@@ -263,7 +268,7 @@ export default function MandiDashboard() {
                     <div className={`w-3 h-3 rounded-full ${scanState.status === 'error' ? 'bg-red-500 animate-pulse' : scanState.status === 'success' ? 'bg-green-600' : 'bg-blue-500 animate-pulse'}`}></div>
                     <span className="text-sm font-medium text-gray-600">
                       {scanState.status === 'idle' ? 'Point camera at QR Code' : 
-                       scanState.status === 'loading' ? 'Processing...' : 
+                       scanState.status === 'loading' ? scanState.message || 'Processing...' : 
                        scanState.status === 'success' ? 'Ready for next' : 'Retrying soon'}
                     </span>
                   </div>
@@ -275,22 +280,36 @@ export default function MandiDashboard() {
 
         {/* Activity Log */}
         <div className="space-y-4">
-          <div className="flex bg-white/50 p-1.5 rounded-xl border border-green-200/80 mb-2">
+          <div className="flex bg-white/50 p-1.5 rounded-xl border border-green-200/80 mb-2 overflow-x-auto custom-scrollbar">
             <button
               onClick={() => setLogTab('pending')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
-                logTab === 'pending' ? 'bg-green-50 text-amber-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
+              className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
+                logTab === 'pending' ? 'bg-green-50 text-amber-500 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              <Clock className="h-4 w-4" /> Expected Today
+              <Clock className="h-4 w-4" /> Expected
+            </button>
+            <button
+              onClick={() => setLogTab('delayed')}
+              className={`flex-1 min-w-[140px] flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
+                logTab === 'delayed' ? 'bg-orange-50 text-orange-600 shadow-sm border border-orange-200' : 'text-gray-600 hover:text-orange-600'
+              }`}
+            >
+              <div className="relative">
+                <Clock className="h-4 w-4" />
+                {pendingBookings.filter(b => b.isDelayed).length > 0 && (
+                  <span className="absolute -top-1 -right-1 h-2.5 w-2.5 bg-red-500 rounded-full animate-pulse border border-white"></span>
+                )}
+              </div>
+              Emergency Fit-in
             </button>
             <button
               onClick={() => setLogTab('recent')}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
-                logTab === 'recent' ? 'bg-green-50 text-emerald-400 shadow-sm' : 'text-gray-600 hover:text-green-900'
+              className={`flex-1 min-w-[120px] flex items-center justify-center gap-2 py-2 text-sm font-medium rounded-lg transition-all ${
+                logTab === 'recent' ? 'bg-green-50 text-emerald-500 shadow-sm' : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              <CheckCircle2 className="h-4 w-4" /> Recent Scans
+              <CheckCircle2 className="h-4 w-4" /> Recent
             </button>
           </div>
 
@@ -320,26 +339,62 @@ export default function MandiDashboard() {
                   ))}
                 </div>
               )
-            ) : (
-              pendingBookings.length === 0 ? (
+            ) : logTab === 'pending' ? (
+              pendingBookings.filter(b => !b.isDelayed).length === 0 ? (
                 <div className="p-8 text-center">
-                  <p className="text-gray-500 text-sm">No pending tokens for today.</p>
+                  <p className="text-gray-500 text-sm">No regular pending tokens for today.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {pendingBookings.map((b) => (
+                  {pendingBookings.filter(b => !b.isDelayed).map((b) => (
                     <div key={b._id} className="p-3 bg-green-50/50 rounded-xl border border-green-200/50 flex items-center justify-between">
                       <div>
-                        <p className="text-amber-400 font-mono text-sm font-bold tracking-wider">{b.virtualToken}</p>
+                        <p className="text-amber-500 font-mono text-sm font-bold tracking-wider">{b.virtualToken}</p>
                         <p className="text-xs text-gray-500 mt-1">{b.cropType} • {b.quantity} Qtl</p>
                       </div>
                       <div className="text-right flex flex-col items-end">
-                        <span className="text-[10px] text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-widest font-semibold mb-1">
+                        <span className="text-[10px] text-amber-600 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 uppercase tracking-widest font-semibold mb-1">
                           Expected
                         </span>
                         <p className="text-[10px] text-gray-600">
                           {b.timeSlot?.split(' - ')[0] || b.timeSlot}
                         </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              pendingBookings.filter(b => b.isDelayed).length === 0 ? (
+                <div className="p-8 text-center bg-orange-50/50 rounded-xl">
+                  <CheckCircle2 className="h-8 w-8 text-orange-200 mx-auto mb-2" />
+                  <p className="text-orange-800 text-sm font-medium">No delayed bookings.</p>
+                  <p className="text-orange-600/70 text-xs mt-1">Queue is running smoothly.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {pendingBookings.filter(b => b.isDelayed).map((b) => (
+                    <div key={b._id} className="p-3 bg-orange-50 rounded-xl border border-orange-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="text-orange-600 font-mono text-sm font-bold tracking-wider">{b.virtualToken}</p>
+                          {b.verificationFailed && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-600 border border-red-200 font-bold" title="Weather/Location Verification Failed">
+                              TRUST ALERT
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-gray-600">{b.cropType} • {b.quantity} Qtl</p>
+                        <p className="text-xs text-orange-700/80 italic line-clamp-1 mt-1">"{b.delayReason}"</p>
+                      </div>
+                      <div className="text-right flex flex-row sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto gap-2">
+                        <span className="text-[10px] text-orange-700 bg-orange-500/20 px-2 py-0.5 rounded border border-orange-500/30 uppercase tracking-widest font-semibold">
+                          Buffer Queue
+                        </span>
+                        <div className="text-[10px] text-orange-800 text-right">
+                          <span className="block font-medium">Grace Ends:</span>
+                          <span className="font-bold">{new Date(b.gracePeriodEndTime).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -360,7 +415,7 @@ function ProcessingOverlay({ scanState }: { scanState: ScanResult }) {
       {scanState.status === 'loading' && (
         <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex flex-col items-center">
           <Loader2 className="h-16 w-16 text-green-600 animate-spin mb-4" />
-          <p className="text-green-800 font-semibold">Verifying Token...</p>
+          <p className="text-green-800 font-semibold">{scanState.message || 'Verifying Token...'}</p>
         </motion.div>
       )}
       

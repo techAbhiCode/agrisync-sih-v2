@@ -199,10 +199,7 @@ export default function Login() {
           </CardContent>
         </Card>
         
-        {/* Pro-Tip for Hackathon presentation */}
-        <p className="text-center text-xs text-zinc-600 mt-6 font-mono">
-          Demo: Use any email with "admin" to access Control Panel.
-        </p>
+        
       </motion.div>
     </div>
   );

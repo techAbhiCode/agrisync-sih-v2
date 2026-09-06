@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Bot, User, Sparkles, Loader2, Leaf, MapPin, CloudSun, Target, Info, CheckCircle2 } from 'lucide-react';
+import { Send, Bot, User, Sparkles, Loader2, Leaf, MapPin, CloudSun, Target, Info, CheckCircle2, Mic, MicOff } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
+import { useTranslation } from 'react-i18next';
 import { askAdvisory, getAdvisoryHistory, getCropRecommendations } from '@/lib/api';
 import { Card } from '@/components/ui/card';
 
@@ -30,6 +31,7 @@ interface CropRecData {
 }
 
 export default function Advisory() {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState<'chat' | 'recommendation'>('chat');
 
   // Chat State
@@ -43,7 +45,63 @@ export default function Advisory() {
   const [input, setInput] = useState('');
   const [isChatLoading, setIsChatLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [isDictating, setIsDictating] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognitionAPI();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = false;
+      
+      recognitionRef.current.onresult = (event: any) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (finalTranscript) {
+          setInput(prev => (prev + ' ' + finalTranscript).trim());
+        }
+      };
+
+      recognitionRef.current.onerror = (e: any) => {
+        console.error("Speech recognition error:", e);
+        setIsDictating(false);
+      };
+
+      recognitionRef.current.onstart = () => {
+        setIsDictating(true);
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsDictating(false);
+      };
+    }
+  }, []);
+
+  const toggleDictation = () => {
+    if (isDictating) {
+      recognitionRef.current?.stop();
+      setIsDictating(false);
+    } else {
+      if (recognitionRef.current) {
+        setIsDictating(true); // Set synchronously to show UI immediately
+        try {
+          recognitionRef.current.lang = i18n.language === 'hi' ? 'hi-IN' : 'en-IN';
+          recognitionRef.current.start();
+        } catch (e: any) {
+          console.error("Failed to start speech recognition:", e);
+          setIsDictating(false);
+          alert(`Mic start failed: ${e?.message || e}`);
+        }
+      } else {
+        alert("Your browser does not support voice input.");
+      }
+    }
+  };
   // Recommendation State
   const [locationInput, setLocationInput] = useState('');
   const [isRecLoading, setIsRecLoading] = useState(false);
@@ -145,8 +203,8 @@ export default function Advisory() {
               <Sparkles className="h-6 w-6 text-lime-400" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-green-950 tracking-tight">AI Services</h1>
-              <p className="text-gray-600 text-sm">Powered by AgriGenius</p>
+              <h1 className="text-xl font-bold text-green-950 tracking-tight">{t('advisory.header.title')}</h1>
+              <p className="text-gray-600 text-sm">{t('advisory.header.subtitle')}</p>
             </div>
           </div>
 
@@ -158,7 +216,7 @@ export default function Advisory() {
                   : 'text-gray-600 hover:text-green-950'
                 }`}
             >
-              Virtual Agronomist
+              {t('advisory.tabs.chat')}
             </button>
             <button
               onClick={() => setActiveTab('recommendation')}
@@ -167,7 +225,7 @@ export default function Advisory() {
                   : 'text-gray-600 hover:text-green-950'
                 }`}
             >
-              Crop Recommender
+              {t('advisory.tabs.recommendation')}
             </button>
           </div>
         </div>
@@ -251,7 +309,7 @@ export default function Advisory() {
                       </div>
                       <Card className="p-4 bg-green-100/80 border-none rounded-2xl rounded-tl-sm flex items-center gap-3">
                         <Loader2 className="h-4 w-4 text-lime-400 animate-spin" />
-                        <span className="text-sm text-gray-600 font-medium">Analyzing...</span>
+                        <span className="text-sm text-gray-600 font-medium">{t('advisory.chat.analyzing')}</span>
                       </Card>
                     </div>
                   </motion.div>
@@ -269,17 +327,29 @@ export default function Advisory() {
                     type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    placeholder="Ask about crops, pests, fertilizers..."
+                    placeholder={t('advisory.chat.placeholder')}
                     disabled={isChatLoading}
-                    className="w-full pl-12 pr-14 py-4 bg-white border border-green-200 focus:border-green-500/50 focus:ring-1 focus:ring-lime-500/50 rounded-2xl text-green-950 placeholder-zinc-500 transition-all shadow-inner"
+                    className="w-full pl-12 pr-28 py-4 bg-white border border-green-200 focus:border-green-500/50 focus:ring-1 focus:ring-lime-500/50 rounded-2xl text-green-950 placeholder-zinc-500 transition-all shadow-inner"
                   />
-                  <button
-                    type="submit"
-                    disabled={!input.trim() || isChatLoading}
-                    className="absolute right-2 p-2.5 bg-green-600 hover:bg-lime-400 disabled:bg-green-50 disabled:text-gray-500 text-zinc-950 rounded-xl transition-colors shadow-lg group"
-                  >
-                    <Send className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
-                  </button>
+                  <div className="absolute right-2 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={toggleDictation}
+                      className={`p-2.5 rounded-xl transition-colors shadow-sm ${
+                        isDictating ? 'bg-red-100 text-red-600 animate-pulse' : 'bg-green-50 hover:bg-green-100 text-green-600'
+                      }`}
+                      title="Dictate message"
+                    >
+                      {isDictating ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={!input.trim() || isChatLoading}
+                      className="p-2.5 bg-green-600 hover:bg-lime-400 disabled:bg-green-50 disabled:text-gray-500 text-zinc-950 rounded-xl transition-colors shadow-lg group"
+                    >
+                      <Send className="h-5 w-5 group-hover:translate-x-0.5 transition-transform" />
+                    </button>
+                  </div>
                 </form>
               </div>
             </motion.div>
@@ -298,9 +368,9 @@ export default function Advisory() {
               <div className="bg-gradient-to-br from-emerald-900/30 to-yellow-600 border border-emerald-500/20 p-6 rounded-3xl shadow-xl">
                 <h2 className="text-2xl font-bold text-green-950 mb-2 flex items-center gap-2">
                   <Target className="h-6 w-6 text-emerald-400" />
-                  Smart Crop Recommendations
+                  {t('advisory.recommender.title')}
                 </h2>
-                <p className="text-gray-600 mb-6">Enter your location to get AI-analyzed crop suggestions based on live weather and regional climate data.</p>
+                <p className="text-gray-600 mb-6">{t('advisory.recommender.subtitle')}</p>
 
                 <form onSubmit={handleRecSubmit} className="relative flex items-center max-w-xl">
                   <div className="absolute left-4 text-gray-500 pointer-events-none">
@@ -310,7 +380,7 @@ export default function Advisory() {
                     type="text"
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
-                    placeholder="Enter location (e.g., Kanpur, UP)"
+                    placeholder={t('advisory.recommender.placeholder')}
                     disabled={isRecLoading}
                     className="w-full pl-12 pr-14 py-4 bg-green-50 border border-green-300 focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 rounded-2xl text-green-950 placeholder-zinc-500 transition-all shadow-inner"
                   />
@@ -338,13 +408,13 @@ export default function Advisory() {
                         <CloudSun className="h-6 w-6 text-blue-400" />
                       </div>
                       <div>
-                        <h3 className="text-green-950 font-medium text-lg">Live Weather in {recData.location}</h3>
+                        <h3 className="text-green-950 font-medium text-lg">{t('advisory.recommender.liveWeather')} {recData.location}</h3>
                         {recData.weather ? (
                           <p className="text-gray-600">
                             {recData.weather.temp}°C, {recData.weather.humidity}% Humidity, {recData.weather.condition}
                           </p>
                         ) : (
-                          <p className="text-gray-500">Weather data unavailable</p>
+                          <p className="text-gray-500">{t('advisory.recommender.unavailable')}</p>
                         )}
                       </div>
                     </div>
@@ -381,7 +451,7 @@ export default function Advisory() {
                         <Info className="h-6 w-6 text-green-700" />
                       </div>
                       <div>
-                        <h4 className="text-green-950 font-bold mb-2">Expert Advice</h4>
+                        <h4 className="text-green-950 font-bold mb-2">{t('advisory.recommender.expertAdvice')}</h4>
                         <p className="text-green-800 leading-relaxed text-sm sm:text-base">
                           {recData.expertAdvice}
                         </p>

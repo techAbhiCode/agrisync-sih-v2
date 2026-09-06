@@ -40,6 +40,13 @@ const bookingSchema = new mongoose.Schema({
     enum: ['PENDING', 'APPROVED', 'AT_GATE', 'WEIGHING', 'PAYMENT', 'COMPLETED', 'REJECTED', 'CANCELLED'],
     default: 'PENDING'
   },
+  slotStartTime: { type: Date },
+  slotEndTime: { type: Date },
+  isDelayed: { type: Boolean, default: false },
+  delayReason: { type: String },
+  gracePeriodEndTime: { type: Date },
+  delayCount: { type: Number, default: 0 },
+  verificationFailed: { type: Boolean, default: false },
   virtualToken: {
     type: String,
     unique: true,

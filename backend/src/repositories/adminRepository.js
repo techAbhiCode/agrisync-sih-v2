@@ -1,6 +1,7 @@
 const MandiRequest = require('../models/MandiRequest');
 const User = require('../models/User');
 const Notification = require('../models/Notification');
+const Mandi = require('../models/Mandi');
 
 class AdminRepository {
   async findPendingRequest(userId) {
@@ -37,6 +38,31 @@ class AdminRepository {
 
   async createNotification(data) {
     return await Notification.create(data);
+  }
+
+  async createNotifications(dataArray) {
+    return await Notification.insertMany(dataArray);
+  }
+
+  async createMandi(data) {
+    const mandi = new Mandi(data);
+    return await mandi.save();
+  }
+
+  async findFarmersNear(lng, lat, maxDistanceInMeters = 50000) {
+    // Requires geo_location 2dsphere index on User
+    return await User.find({
+      geo_location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [lng, lat]
+          },
+          $maxDistance: maxDistanceInMeters
+        }
+      },
+      role: 'FARMER'
+    });
   }
 }
 

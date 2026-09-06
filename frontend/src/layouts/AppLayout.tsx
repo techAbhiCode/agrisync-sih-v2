@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sprout, LayoutDashboard, CalendarDays, TrendingUp, LogOut, Truck, Bot, ShieldCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/store/authStore';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useBookingStore } from '@/store/bookingStore';
 import { auth } from '@/lib/firebase';
 import { signOut, onAuthStateChanged } from 'firebase/auth';
 import NotificationPanel from '@/components/NotificationPanel';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
+import VoiceAssistant from '@/components/VoiceAssistant';
 
 export default function AppLayout() {
   const { user, logout } = useAuthStore();
@@ -15,6 +18,7 @@ export default function AppLayout() {
   const { fetchBookings } = useBookingStore();
   const location = useLocation();
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const { t } = useTranslation();
 
   useEffect(() => {
     let unsubscribe: () => void;
@@ -53,14 +57,14 @@ export default function AppLayout() {
 
   // Dynamic Navigation Links based on Role (RBAC)
   const navLinks = [
-    { path: '/dashboard', name: 'Dashboard', icon: LayoutDashboard, roles: ['FARMER'] },
-    { path: '/booking', name: 'Booking', icon: CalendarDays, roles: ['FARMER'] },
-    { path: '/logistics', name: 'Micro-Logistics', icon: Truck, roles: ['FARMER', 'LOGISTICS'] },
-    { path: '/advisory', name: 'AI Advisory', icon: Bot, roles: ['FARMER'] },
-    { path: '/mandi-scanner', name: 'Mandi Scanner', icon: Sprout, roles: ['MANDI_ADMIN'] },
-    { path: '/market-trends', name: 'Market Trends', icon: TrendingUp, roles: ['FARMER', 'ADMIN', 'LOGISTICS', 'MANDI_ADMIN', 'system_admin'] },
-    { path: '/admin', name: 'Control Panel', icon: Sprout, roles: ['ADMIN'] },
-    { path: '/super-admin', name: 'Super Admin', icon: ShieldCheck, roles: ['system_admin'] },
+    { path: '/dashboard', name: t('nav.dashboard'), icon: LayoutDashboard, roles: ['FARMER'] },
+    { path: '/booking', name: t('nav.booking'), icon: CalendarDays, roles: ['FARMER'] },
+    { path: '/logistics', name: t('nav.logistics'), icon: Truck, roles: ['FARMER', 'LOGISTICS'] },
+    { path: '/advisory', name: t('nav.advisory'), icon: Bot, roles: ['FARMER'] },
+    { path: '/mandi-scanner', name: t('nav.mandiScanner'), icon: Sprout, roles: ['MANDI_ADMIN'] },
+    { path: '/market-trends', name: t('nav.marketTrends'), icon: TrendingUp, roles: ['FARMER', 'ADMIN', 'LOGISTICS', 'MANDI_ADMIN', 'system_admin'] },
+    { path: '/admin', name: t('nav.admin'), icon: Sprout, roles: ['ADMIN'] },
+    { path: '/super-admin', name: t('nav.superAdmin'), icon: ShieldCheck, roles: ['system_admin'] },
   ].filter(link => user && link.roles.includes(user.role));
 
   return (
@@ -75,7 +79,7 @@ export default function AppLayout() {
           initial={{ y: -100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ type: "spring", stiffness: 200, damping: 20 }}
-          className="pointer-events-auto bg-yellow-100/90 backdrop-blur-xl border border-green-500 shadow-sm rounded-full px-3 sm:px-6 py-2 flex items-center justify-between w-[96%] max-w-5xl"
+          className="pointer-events-auto bg-yellow-100/90 backdrop-blur-xl border border-green-500 shadow-sm rounded-full px-3 sm:px-6 py-2 flex items-center justify-between w-[96%] max-w-7xl"
         >
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 mr-2 sm:mr-8 group shrink-0">
@@ -86,7 +90,7 @@ export default function AppLayout() {
           </Link>
 
           {/* Animated Navigation Links */}
-          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar flex-1 justify-center mask-image-edges">
+          <div className="flex items-center gap-1 overflow-x-auto no-scrollbar flex-1 justify-center mask-image-edges px-2">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
               return (
@@ -95,7 +99,7 @@ export default function AppLayout() {
                   to={link.path}
                   onMouseEnter={() => setHoveredPath(link.path)}
                   onMouseLeave={() => setHoveredPath(null)}
-                  className="relative px-4 py-2 rounded-full text-sm font-medium transition-colors z-10 flex items-center gap-2"
+                  className="relative px-3 sm:px-4 py-2 rounded-full text-sm font-medium transition-colors z-10 flex items-center gap-2 shrink-0"
                 >
                   <link.icon className={`h-4 w-4 z-10 relative transition-colors ${isActive ? 'text-zinc-950' : 'text-gray-600'}`} />
                   <span className={`z-10 relative transition-colors hidden md:inline-block whitespace-nowrap ${isActive ? 'text-zinc-950' : 'text-green-800'}`}>
@@ -129,6 +133,11 @@ export default function AppLayout() {
 
           {/* Right: Notifications + User Profile + Logout */}
           <div className="flex items-center gap-1 sm:gap-2 ml-2 sm:ml-6 pl-2 sm:pl-6 border-l border-green-300/50 shrink-0">
+            {/* Language Switcher */}
+            <div className="hidden md:block mr-2">
+              <LanguageSwitcher />
+            </div>
+
             {/* Notification Bell */}
             <NotificationPanel />
 
@@ -142,7 +151,7 @@ export default function AppLayout() {
             <button 
               onClick={handleLogout}
               className="p-2 rounded-full hover:bg-green-100/80 text-gray-600 hover:text-red-400 transition-colors"
-              title="Sign out"
+              title={t('nav.signOut')}
             >
               <LogOut className="h-5 w-5" />
             </button>
@@ -166,6 +175,8 @@ export default function AppLayout() {
         </AnimatePresence>
       </main>
       
+      {/* Global Voice Assistant */}
+      <VoiceAssistant />
     </div>
   );
 }

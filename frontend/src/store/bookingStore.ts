@@ -12,6 +12,7 @@ export interface Booking {
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'COMPLETED';
   virtualToken: string;
   queuePosition?: number;
+  estimatedWaitTime?: number;
   createdAt: string;
 }
 

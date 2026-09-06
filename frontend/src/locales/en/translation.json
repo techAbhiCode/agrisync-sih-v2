@@ -1,0 +1,273 @@
+{
+  "navbar": {
+    "brand": "AgriSync",
+    "features": "Features",
+    "signIn": "Sign In"
+  },
+  "hero": {
+    "title1": "India's Smartest",
+    "title2": "Agricultural",
+    "title3": "Management Platform",
+    "subtitle": "Eliminate mandi queues, get AI-powered price intelligence, track your crops from field to payment — all from one platform built for India's farmers.",
+    "scroll": "Scroll"
+  },
+  "features": {
+    "badge": "Platform Features",
+    "title1": "Everything a farmer needs,",
+    "title2": "in one place.",
+    "items": {
+      "slot": {
+        "title": "Smart Slot Booking",
+        "desc": "Reserve your mandi entry window digitally. No more arriving at 4 AM to secure a spot."
+      },
+      "token": {
+        "title": "Virtual Token System",
+        "desc": "Receive a QR-based token the moment you book. Scan at the gate — zero paper, zero chaos."
+      },
+      "price": {
+        "title": "AI Price Intelligence",
+        "desc": "Gemini-powered predictions on commodity prices. Know when to sell before the market moves."
+      },
+      "map": {
+        "title": "Micro-Logistics Map",
+        "desc": "Real-time geospatial map of nearest active mandis with capacity and routing."
+      },
+      "status": {
+        "title": "Live Procurement Status",
+        "desc": "Track your goods from token scan → weighing → quality check → payment in real time."
+      },
+      "rbac": {
+        "title": "Role-Based Access Control",
+        "desc": "Separate portals for Farmers, Hub Managers, and Logistics — each with tailored controls."
+      }
+    }
+  },
+  "footer": {
+    "brand": "AgriSync",
+    "desc": "Digitizing agricultural procurement for Indian farmers. Fast, transparent, and efficient.",
+    "copyright": "© {{year}} AgriSync. Built for India's farmers."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "booking": "Booking",
+    "logistics": "Micro-Logistics",
+    "advisory": "AI Advisory",
+    "mandiScanner": "Mandi Scanner",
+    "marketTrends": "Market Trends",
+    "admin": "Control Panel",
+    "superAdmin": "Super Admin",
+    "signOut": "Sign out"
+  },
+  "dashboard": {
+    "greeting": {
+      "morning": "Good morning",
+      "afternoon": "Good afternoon",
+      "evening": "Good evening"
+    },
+    "subtitle": "Here's your live market intelligence for today.",
+    "activeToken": "Active Token",
+    "noActiveToken": "No Active Tokens",
+    "bookSlot": "Book a slot",
+    "live": "Live",
+    "quickActions": {
+      "book": "Book a Slot",
+      "trends": "Market Trends",
+      "mandis": "Find Mandis"
+    },
+    "stats": {
+      "market": {
+        "title": "Live Market",
+        "value": "Bullish",
+        "sub": "+4.5% this week"
+      },
+      "mandis": {
+        "title": "Active Mandis",
+        "value": "14 Open",
+        "sub": "Nearest: 2.4 km"
+      },
+      "health": {
+        "title": "Crop Health AI",
+        "value": "Optimal",
+        "sub": "No spoilage detected"
+      },
+      "queue": {
+        "title": "Live Queue Status",
+        "noQueue": "No Queue",
+        "bookToJoin": "Book a slot to join",
+        "pos": "Pos: #{{pos}}",
+        "wait": "~{{wait}} min wait time"
+      }
+    },
+    "charts": {
+      "title": "5-Year Commodity Price Trend (₹/Quintal)"
+    },
+    "advisory": {
+      "bullish": {
+        "title": "AI Insight: Bullish Signal",
+        "desc": "Wheat prices predicted to rise 4.5% next quarter. Lower rainfall forecast is the key driver.",
+        "link": "View Analysis"
+      },
+      "spoilage": {
+        "title": "Spoilage Alert",
+        "desc": "High humidity in cluster B. Expedite Paddy liquidation within 14 days."
+      }
+    },
+    "bookingCta": {
+      "new": "Book Your Next Slot",
+      "check": "Check all your bookings"
+    },
+    "activity": {
+      "title": "Recent Activity"
+    }
+  },
+  "marketTrends": {
+    "title": "Market Trends & AI Insights",
+    "subtitle": "Real-time mandi prices and ML-based forecasting.",
+    "latestPrices": "Latest Mandi Prices",
+    "compareCrops": "Compare Crops",
+    "timeframe": {
+      "yearly": "5 Years",
+      "monthly": "Monthly (1Y)"
+    },
+    "gap": {
+      "label": "Interval Gap",
+      "none": "None",
+      "oneMonth": "1 Mo",
+      "quarterly": "Quarterly"
+    },
+    "charts": {
+      "bar": "Commodity Price Aggregation (₹ per Quintal)",
+      "line": "Price Trend Analysis"
+    },
+    "ai": {
+      "forecast": "Market Forecast (AI)",
+      "forecastLoading": "Analyzing market trends...",
+      "forecastPlaceholder": "Select timeframe to see AI market predictions.",
+      "alert": "Smart Spoilage Alert",
+      "alertLoading": "Generating risk assessment...",
+      "alertPlaceholder": "Select timeframe to see AI spoilage alerts."
+    }
+  },
+  "booking": {
+    "header": {
+      "title": "Book Your Slot",
+      "subtitle": "Reserve your mandi entry window digitally and skip the queue."
+    },
+    "tabs": {
+      "newBooking": "New Booking",
+      "upcoming": "Upcoming",
+      "past": "Past Bookings",
+      "myBookings": "My Bookings",
+      "completed": "Completed",
+      "expired": "Expired",
+      "activeTrucks": "Active Trucks",
+      "truckHistory": "Truck History"
+    },
+    "form": {
+      "steps": {
+        "crop": "Crop Details",
+        "mandi": "Select Mandi",
+        "date": "Date & Time",
+        "confirm": "Confirm"
+      },
+      "mandiEntryPass": "Mandi Entry Pass",
+      "mandiEntryPassDesc": "Fill details to secure your spot.",
+      "cropType": "Crop Type",
+      "quantity": "Quantity (Quintals)",
+      "vehicle": "Vehicle Number",
+      "state": "State",
+      "district": "District",
+      "selectMandi": "Select a Mandi",
+      "capacity": "Capacity",
+      "date": "Preferred Date",
+      "time": "Preferred Time",
+      "btnNext": "Next Step",
+      "btnBack": "Back",
+      "btnConfirm": "Confirm Booking"
+    },
+    "success": {
+      "title": "Booking Confirmed!",
+      "subtitle": "Your slot has been successfully reserved.",
+      "token": "Virtual Token",
+      "mandi": "Mandi",
+      "date": "Date",
+      "time": "Time",
+      "download": "Download QR",
+      "dashboard": "Back to Dashboard"
+    },
+    "ticket": {
+      "title": "Booking Ticket",
+      "subtitle": "Present this QR code at the Mandi gate",
+      "status": "Status",
+      "delayReason": "Reason for delay",
+      "delayPlaceholder": "e.g. Traffic, Vehicle Breakdown",
+      "cancel": "Cancel",
+      "submit": "Submit",
+      "reportDelay": "Report Delay",
+      "logisticsTitle": "Logistics Ticket",
+      "logisticsSubtitle": "Valid for {{vehicle}}",
+      "trackingStatus": "Tracking Status",
+      "booked": "Booked",
+      "onboard": "Onboard",
+      "arrived": "Arrived",
+      "pickupFrom": "Pickup From",
+      "deliverTo": "Deliver To",
+      "cargo": "Cargo",
+      "cost": "Cost",
+      "markOnboard": "Mark as Onboard",
+      "markDelivered": "Mark as Delivered"
+    }
+  },
+  "advisory": {
+    "header": {
+      "title": "AI Services",
+      "subtitle": "Powered by AgriGenius"
+    },
+    "tabs": {
+      "chat": "Virtual Agronomist",
+      "recommendation": "Crop Recommender"
+    },
+    "chat": {
+      "placeholder": "Ask about crops, pests, fertilizers...",
+      "analyzing": "Analyzing..."
+    },
+    "recommender": {
+      "title": "Smart Crop Recommendations",
+      "subtitle": "Enter your location to get AI-analyzed crop suggestions based on live weather and regional climate data.",
+      "placeholder": "Enter location (e.g., Kanpur, UP)",
+      "liveWeather": "Live Weather in",
+      "unavailable": "Weather data unavailable",
+      "expertAdvice": "Expert Advice"
+    }
+  },
+  "logistics": {
+    "header": {
+      "title": "Micro-Logistics",
+      "subtitle": "Real-time mapping of active mandis, routing, and fleet capacities."
+    },
+    "advisory": {
+      "title": "AI Weather Advisory",
+      "humidity": "Humidity"
+    },
+    "tabs": {
+      "hubs": "Active Hubs",
+      "trucks": "Available Trucks",
+      "myTrucks": "My Bookings"
+    },
+    "card": {
+      "locating": "Locating nearby assets...",
+      "basedOn": "Based on your location:",
+      "unknown": "Unknown location"
+    },
+    "hub": {
+      "capacity": "Total Capacity",
+      "available": "Available Space",
+      "btnBook": "Book Hub Space"
+    },
+    "truck": {
+      "type": "Vehicle Type",
+      "capacity": "Max Capacity",
+      "btnBook": "Book This Truck"
+    }
+  }
+}

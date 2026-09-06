@@ -7,7 +7,7 @@ import {
   MapPin, Clock, Download, Loader2, TicketCheck,
   History, XCircle, Truck
 } from 'lucide-react';
-import { getMyTruckBookings, createBooking, updateTruckStatus } from '@/lib/api';
+import { getMyTruckBookings, createBooking, updateTruckStatus, getSlotAvailability, reportDelay } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,6 +16,7 @@ import QRCode from 'react-qr-code';
 import { useNotificationStore } from '@/store/notificationStore';
 import { useBookingStore } from '@/store/bookingStore';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -45,6 +46,7 @@ const TIME_SLOTS = [
 ];
 
 export default function Booking() {
+  const { t } = useTranslation();
   const location = useLocation();
   
   const initialMandi = useMemo(() => {
@@ -75,8 +77,31 @@ export default function Booking() {
   const [selectedBooking, setSelectedBooking] = useState<any>(null);
   const [selectedTruckBooking, setSelectedTruckBooking] = useState<any>(null);
   const [truckBookings, setTruckBookings] = useState<any[]>([]);
+  const [slotAvailability, setSlotAvailability] = useState<Record<string, number>>({});
+  const [mandiCapacity, setMandiCapacity] = useState<number>(45);
+  const [isReportingDelay, setIsReportingDelay] = useState(false);
+  const [delayReason, setDelayReason] = useState('');
 
   const { bookings, getUpcomingBookings, getCompletedBookings, getExpiredBookings, fetchBookings } = useBookingStore();
+
+  useEffect(() => {
+    if (mandi) {
+      getSlotAvailability(mandi, date || '')
+        .then(res => {
+          if (res.success) {
+            if (date) {
+              setSlotAvailability(res.availability || {});
+            } else {
+              setSlotAvailability({});
+            }
+            if (res.capacity) setMandiCapacity(res.capacity);
+          }
+        })
+        .catch(console.error);
+    } else {
+      setSlotAvailability({});
+    }
+  }, [mandi, date]);
 
   // Bookings are fetched globally by AppLayout when auth state changes
   useEffect(() => {
@@ -107,6 +132,34 @@ export default function Booking() {
       toast.error('Failed to update status', {
         description: 'Please try again later.'
       });
+    }
+  };
+
+  const handleReportDelay = async () => {
+    if (!delayReason.trim()) {
+      toast.warning('Reason required', { description: 'Please enter a valid reason.' });
+      return;
+    }
+    
+    try {
+      // Mock coordinates for current location
+      const currentLocation = {
+        type: 'Point',
+        coordinates: [78.0, 26.0] // Simulated fallback coords
+      };
+      
+      const res = await reportDelay(selectedBooking.virtualToken, delayReason, currentLocation);
+      if (res.success) {
+        toast.success('Delay Reported', { description: res.message || 'You have been granted a grace period.' });
+        setIsReportingDelay(false);
+        setDelayReason('');
+        setSelectedBooking(null);
+        fetchBookings(); // refresh the list
+      }
+    } catch (error: any) {
+      console.error(error);
+      const errorMessage = error.response?.data?.error || 'Failed to report delay';
+      toast.error('Error', { description: errorMessage });
     }
   };
 
@@ -266,6 +319,16 @@ export default function Booking() {
               <p className="text-sm text-gray-600 flex items-center gap-1.5">
                 <Leaf className="h-3.5 w-3.5 text-green-600" /> {b.cropType} • {b.quantity} Qtl
               </p>
+              {(b.status === 'PENDING' || b.status === 'APPROVED') && b.estimatedWaitTime !== undefined && (
+                <div className="flex gap-3 mt-1">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200 flex items-center gap-1">
+                     Queue Pos: #{(b.queuePosition ?? 0) + 1}
+                  </span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-orange-50 text-orange-700 border border-orange-200 flex items-center gap-1">
+                    <Clock className="h-3 w-3" /> EWT: ~{b.estimatedWaitTime} mins
+                  </span>
+                </div>
+              )}
             </div>
             
             <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center border-t sm:border-t-0 sm:border-l border-green-200/50 pt-3 sm:pt-0 sm:pl-4">
@@ -294,9 +357,9 @@ export default function Booking() {
         <div className="flex flex-col items-center lg:items-start w-full">
           <motion.div variants={itemVariants} className="text-center lg:text-left mb-6 md:mb-8">
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-green-950 mb-2">
-              Smart <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-600">Slot Booking</span>
+              {t('booking.header.title').split(' ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-600">{t('booking.header.title').substring(t('booking.header.title').indexOf(' ') + 1)}</span>
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">Reserve your mandi slot to bypass physical queues.</p>
+            <p className="text-gray-600 text-sm md:text-base">{t('booking.header.subtitle')}</p>
           </motion.div>
 
           {!isBooked ? (
@@ -305,16 +368,16 @@ export default function Booking() {
                 <CardHeader>
                   <CardTitle className="text-green-950 flex items-center gap-2">
                     <CalendarDays className="h-5 w-5 text-green-600" />
-                    Mandi Entry Pass
+                    {t('booking.form.mandiEntryPass')}
                   </CardTitle>
-                  <CardDescription className="text-gray-500">Fill details to secure your spot.</CardDescription>
+                  <CardDescription className="text-gray-500">{t('booking.form.mandiEntryPassDesc')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleBooking} className="space-y-6">
                     {/* Mandi Selection */}
                     <div className="space-y-2">
                       <Label className="text-green-800 flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-green-700"/> Select Mandi
+                        <MapPin className="h-4 w-4 text-green-700"/> {t('booking.form.selectMandi')}
                       </Label>
                       <select 
                         required
@@ -332,7 +395,7 @@ export default function Booking() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <Label htmlFor="crop" className="text-green-800 flex items-center gap-2">
-                          <Leaf className="h-4 w-4 text-green-700"/> Crop Type
+                          <Leaf className="h-4 w-4 text-green-700"/> {t('booking.form.cropType')}
                         </Label>
                         <Input 
                           id="crop" placeholder="e.g., Wheat, Paddy" required 
@@ -341,11 +404,12 @@ export default function Booking() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="quantity" className="text-green-800 flex items-center gap-2">
-                          <Scale className="h-4 w-4 text-green-700"/> Quantity (Quintals)
+                        <Label htmlFor="quantity" className="text-green-800 flex items-center justify-between">
+                          <span className="flex items-center gap-2"><Scale className="h-4 w-4 text-green-700"/> {t('booking.form.quantity')}</span>
+                          <span className="text-xs text-gray-500 font-normal">Max: {mandiCapacity} Qtl/slot</span>
                         </Label>
                         <Input 
-                          id="quantity" type="number" min="1" placeholder="e.g., 50" required 
+                          id="quantity" type="number" min="1" max={mandiCapacity} placeholder={`e.g., ${Math.min(50, mandiCapacity)}`} required 
                           value={quantity} onChange={e => setQuantity(e.target.value)}
                           className="bg-green-50/50 border-green-200 text-green-950 focus-visible:ring-lime-500" 
                         />
@@ -355,7 +419,7 @@ export default function Booking() {
                     {/* Date Selection */}
                     <div className="space-y-2">
                       <Label htmlFor="date" className="text-green-800 flex items-center gap-2">
-                        <CalendarDays className="h-4 w-4 text-green-700"/> Preferred Date
+                        <CalendarDays className="h-4 w-4 text-green-700"/> {t('booking.form.date')}
                       </Label>
                       <Input 
                         id="date" type="date" required 
@@ -368,29 +432,46 @@ export default function Booking() {
                     {/* Time Slots */}
                     <div className="space-y-3">
                       <Label className="text-green-800 flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-green-700"/> Select Time Slot
+                        <Clock className="h-4 w-4 text-green-700"/> {t('booking.form.time')}
                       </Label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {TIME_SLOTS.map(slot => (
-                          <button
-                            key={slot}
-                            type="button"
-                            onClick={() => setTimeSlot(slot)}
-                            className={`p-3 rounded-lg border text-sm font-medium transition-all ${
-                              timeSlot === slot 
-                              ? 'bg-green-600/10 border-green-500 text-lime-400' 
-                              : 'bg-green-50/50 border-green-200 text-gray-600 hover:border-green-300'
-                            }`}
-                          >
-                            {slot}
-                          </button>
-                        ))}
+                        {TIME_SLOTS.map(slot => {
+                          const currentCount = slotAvailability[slot] || 0;
+                          let loadColor = "text-green-700 bg-green-100 border-green-200";
+                          let loadText = "Available";
+                          
+                          if (currentCount >= mandiCapacity * 0.9) {
+                            loadColor = "text-red-700 bg-red-100 border-red-200";
+                            loadText = "High Load";
+                          } else if (currentCount >= mandiCapacity * 0.5) {
+                            loadColor = "text-orange-700 bg-orange-100 border-orange-200";
+                            loadText = "Moderate";
+                          }
+
+                          return (
+                            <button
+                              key={slot}
+                              type="button"
+                              onClick={() => setTimeSlot(slot)}
+                              className={`p-3 rounded-lg border text-sm font-medium transition-all relative overflow-hidden flex flex-col items-start ${
+                                timeSlot === slot 
+                                ? 'bg-green-600/10 border-green-500 text-lime-400 ring-1 ring-green-500' 
+                                : 'bg-green-50/50 border-green-200 text-gray-600 hover:border-green-300'
+                              }`}
+                            >
+                              <span className="block mb-1 z-10 font-bold">{slot}</span>
+                              <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded border z-10 ${loadColor}`}>
+                                {loadText} ({currentCount} booked)
+                              </span>
+                            </button>
+                          );
+                        })}
                       </div>
                     </div>
 
                     <Button disabled={loading} type="submit" className="w-full bg-green-600 hover:bg-green-700 text-zinc-950 font-bold text-lg h-12 transition-all shadow-[0_0_15px_rgba(132,204,22,0.3)] hover:shadow-[0_0_25px_rgba(132,204,22,0.5)] mt-4">
                       {loading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : (
-                        <>Generate Virtual Token <ArrowRight className="ml-2 h-5 w-5" /></>
+                        <>{t('booking.form.btnConfirm')} <ArrowRight className="ml-2 h-5 w-5" /></>
                       )}
                     </Button>
                   </form>
@@ -415,8 +496,8 @@ export default function Booking() {
                     <div className="absolute -bottom-3 -right-3 w-6 h-6 bg-[#09090b] rounded-full"></div>
                     
                     <CheckCircle2 className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">Booking Confirmed</h2>
-                    <p className="text-gray-500 text-sm">Present this QR code at the Mandi gate</p>
+                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">{t('booking.success.title')}</h2>
+                    <p className="text-gray-500 text-sm">{t('booking.success.subtitle')}</p>
                   </div>
 
                   {/* QR Code Section */}
@@ -428,7 +509,7 @@ export default function Booking() {
                       <QRCode value={qrData} size={160} />
                     </div>
                     <div className="mt-4 text-center">
-                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">Token Number</p>
+                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">{t('booking.success.token')}</p>
                       <p className="text-3xl font-mono text-lime-400 font-bold tracking-widest">{tokenNumber}</p>
                     </div>
                   </div>
@@ -437,29 +518,29 @@ export default function Booking() {
                   <div className="p-6 bg-white">
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Mandi</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.mandi')}</p>
                         <p className="text-green-900 font-medium truncate" title={mandi}>{mandi}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Crop Details</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.form.cropType')}</p>
                         <p className="text-green-900 font-medium">{crop} • {quantity} Qtl</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Date</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.date')}</p>
                         <p className="text-green-900 font-medium">{new Date(date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Time Slot</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.time')}</p>
                         <p className="text-green-900 font-medium">{timeSlot?.split(' - ')[0] || timeSlot}</p>
                       </div>
                     </div>
                     
                     <div className="mt-8 flex gap-3">
                       <Button variant="outline" onClick={() => setIsBooked(false)} className="flex-1 border-green-300 text-green-800 hover:bg-green-50">
-                        Book Another
+                        {t('booking.form.btnBack')}
                       </Button>
                       <Button onClick={() => window.print()} className="flex-1 bg-green-600 hover:bg-green-700 text-zinc-950">
-                        <Download className="h-4 w-4 mr-2" /> Download
+                        <Download className="h-4 w-4 mr-2" /> {t('booking.success.download')}
                       </Button>
                     </div>
                   </div>
@@ -472,7 +553,7 @@ export default function Booking() {
         {/* Right Column: Bookings History */}
         <motion.div variants={itemVariants} className="w-full flex flex-col pt-2 lg:pt-14">
           <div className="flex items-center gap-2 mb-6 text-green-950 font-semibold text-lg">
-            <History className="h-5 w-5 text-green-600" /> My Bookings
+            <History className="h-5 w-5 text-green-600" /> {t('booking.tabs.myBookings')}
           </div>
           
           {/* Custom Tabs */}
@@ -485,7 +566,7 @@ export default function Booking() {
                 : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              Upcoming
+              {t('booking.tabs.upcoming')}
             </button>
             <button
               onClick={() => setActiveTab('completed')}
@@ -495,7 +576,7 @@ export default function Booking() {
                 : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              Completed
+              {t('booking.tabs.completed')}
             </button>
             <button
               onClick={() => setActiveTab('expired')}
@@ -505,7 +586,7 @@ export default function Booking() {
                 : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              Expired
+              {t('booking.tabs.expired')}
             </button>
             <button
               onClick={() => setActiveTab('trucks')}
@@ -515,7 +596,7 @@ export default function Booking() {
                 : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              Active Trucks
+              {t('booking.tabs.activeTrucks')}
             </button>
             <button
               onClick={() => setActiveTab('trucks_history')}
@@ -525,7 +606,7 @@ export default function Booking() {
                 : 'text-gray-600 hover:text-green-900'
               }`}
             >
-              Truck History
+              {t('booking.tabs.truckHistory')}
             </button>
           </div>
 
@@ -564,7 +645,7 @@ export default function Booking() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <Card className="bg-white border-green-500/30 shadow-[0_0_40px_rgba(132,204,22,0.15)] overflow-hidden relative">
+              <Card className="bg-white border-green-500/30 shadow-[0_0_40px_rgba(132,204,22,0.15)] overflow-y-auto max-h-[90vh] relative">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-lime-400 to-emerald-600"></div>
                 
                 <CardContent className="p-0">
@@ -573,8 +654,8 @@ export default function Booking() {
                       <XCircle className="h-6 w-6" />
                     </div>
                     <TicketCheck className="h-12 w-12 text-green-600 mx-auto mb-2" />
-                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">Booking Ticket</h2>
-                    <p className="text-gray-500 text-sm">Present this QR code at the Mandi gate</p>
+                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">{t('booking.ticket.title', 'Booking Ticket')}</h2>
+                    <p className="text-gray-500 text-sm">{t('booking.ticket.subtitle', 'Present this QR code at the Mandi gate')}</p>
                   </div>
 
                   <div className="p-8 flex flex-col items-center justify-center bg-green-50/30 border-b border-green-200 border-dashed relative">
@@ -589,7 +670,7 @@ export default function Booking() {
                       })} size={160} />
                     </div>
                     <div className="mt-4 text-center">
-                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">Token Number</p>
+                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-1">{t('booking.success.token')}</p>
                       <p className="text-3xl font-mono text-lime-400 font-bold tracking-widest">{selectedBooking.virtualToken}</p>
                     </div>
                   </div>
@@ -597,33 +678,75 @@ export default function Booking() {
                   <div className="p-6 bg-white">
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Mandi</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.mandi')}</p>
                         <p className="text-green-900 font-medium truncate" title={selectedBooking.mandiId}>{selectedBooking.mandiId}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Crop Details</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.form.cropType')}</p>
                         <p className="text-green-900 font-medium">{selectedBooking.cropType} • {selectedBooking.quantity} Qtl</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Date</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.date')}</p>
                         <p className="text-green-900 font-medium">{new Date(selectedBooking.preferredDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Time Slot</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.success.time')}</p>
                         <p className="text-green-900 font-medium">{selectedBooking.timeSlot?.split(' - ')[0] || selectedBooking.timeSlot}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Status</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.ticket.status', 'Status')}</p>
                         <p className={`font-medium ${selectedBooking.status === 'COMPLETED' ? 'text-emerald-400' : selectedBooking.status === 'EXPIRED' ? 'text-gray-600' : 'text-lime-400'}`}>
                           {selectedBooking.status}
                         </p>
                       </div>
+                      {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'APPROVED') && selectedBooking.estimatedWaitTime !== undefined && (
+                        <>
+                          <div>
+                            <p className="text-gray-500 text-xs mb-1">Queue Position</p>
+                            <p className="text-blue-600 font-bold">#{selectedBooking.queuePosition + 1}</p>
+                          </div>
+                          <div>
+                            <p className="text-gray-500 text-xs mb-1">Estimated Wait</p>
+                            <p className="text-orange-600 font-bold">~{selectedBooking.estimatedWaitTime} mins</p>
+                          </div>
+                        </>
+                      )}
                     </div>
                     
-                    <div className="mt-8 flex gap-3">
-                      <Button className="w-full bg-green-600 hover:bg-green-700 text-zinc-950" onClick={() => window.print()}>
-                        <Download className="h-4 w-4 mr-2" /> Download / Print Ticket
-                      </Button>
+                    {selectedBooking.isDelayed && (
+                      <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded-lg text-sm">
+                        <p className="text-orange-800 font-semibold mb-1">Status: Delayed</p>
+                        <p className="text-orange-700">Grace period active until {new Date(selectedBooking.gracePeriodEndTime).toLocaleTimeString()}</p>
+                      </div>
+                    )}
+
+                    <div className="mt-6">
+                      {isReportingDelay ? (
+                        <div className="space-y-3 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                          <Label className="text-xs text-gray-700">{t('booking.ticket.delayReason', 'Reason for delay')}</Label>
+                          <Input 
+                            value={delayReason}
+                            onChange={e => setDelayReason(e.target.value)}
+                            placeholder={t('booking.ticket.delayPlaceholder', 'e.g. Traffic, Vehicle Breakdown')}
+                            className="text-sm"
+                          />
+                          <div className="flex gap-2">
+                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setIsReportingDelay(false)}>{t('booking.ticket.cancel', 'Cancel')}</Button>
+                            <Button size="sm" className="flex-1 bg-orange-500 hover:bg-orange-600 text-white" onClick={handleReportDelay}>{t('booking.ticket.submit', 'Submit')}</Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex gap-3 flex-col sm:flex-row">
+                          {(selectedBooking.status === 'PENDING' || selectedBooking.status === 'APPROVED') && !selectedBooking.isDelayed && (
+                            <Button variant="outline" className="flex-1 border-orange-300 text-orange-700 hover:bg-orange-50" onClick={() => setIsReportingDelay(true)}>
+                              {t('booking.ticket.reportDelay', 'Report Delay')}
+                            </Button>
+                          )}
+                          <Button className="flex-1 bg-green-600 hover:bg-green-700 text-zinc-950" onClick={() => window.print()}>
+                            <Download className="h-4 w-4 mr-2" /> {t('booking.success.download')}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -650,7 +773,7 @@ export default function Booking() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md"
             >
-              <Card className="bg-white border-orange-500/30 shadow-[0_0_40px_rgba(249,115,22,0.15)] overflow-hidden relative">
+              <Card className="bg-white border-orange-500/30 shadow-[0_0_40px_rgba(249,115,22,0.15)] overflow-y-auto max-h-[90vh] relative">
                 <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-orange-400 to-amber-600"></div>
                 
                 <CardContent className="p-0">
@@ -659,8 +782,8 @@ export default function Booking() {
                       <XCircle className="h-6 w-6" />
                     </div>
                     <TicketCheck className="h-12 w-12 text-orange-500 mx-auto mb-2" />
-                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">Logistics Ticket</h2>
-                    <p className="text-gray-500 text-sm">Valid for {selectedTruckBooking.vehicleNumber}</p>
+                    <h2 className="text-2xl font-bold text-green-950 tracking-tight">{t('booking.ticket.logisticsTitle', 'Logistics Ticket')}</h2>
+                    <p className="text-gray-500 text-sm">{t('booking.ticket.logisticsSubtitle', 'Valid for {{vehicle}}', { vehicle: selectedTruckBooking.vehicleNumber })}</p>
                   </div>
 
                   <div className="p-8 flex flex-col items-center justify-center bg-green-50/30 border-b border-green-200 border-dashed relative">
@@ -674,22 +797,22 @@ export default function Booking() {
                       })} size={160} />
                     </div>
                     <div className="mt-6 w-full px-6">
-                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-3 text-center">Tracking Status</p>
+                      <p className="text-gray-500 text-xs uppercase tracking-widest mb-3 text-center">{t('booking.ticket.trackingStatus', 'Tracking Status')}</p>
                       <div className="flex items-center justify-between relative">
                         <div className="absolute top-2 left-0 w-full h-1 bg-green-50 -translate-y-1/2 z-0 rounded-full"></div>
                         <div className="absolute top-2 left-0 h-1 bg-green-600 -translate-y-1/2 z-0 rounded-full transition-all duration-500" style={{ width: selectedTruckBooking.status === 'DELIVERED' ? '100%' : selectedTruckBooking.status === 'IN_TRANSIT' ? '50%' : '0%' }}></div>
                         
                         <div className={`relative z-10 flex flex-col items-center gap-1`}>
                           <div className={`h-4 w-4 rounded-full border-2 border-zinc-900 ${selectedTruckBooking.status === 'PENDING' || selectedTruckBooking.status === 'IN_TRANSIT' || selectedTruckBooking.status === 'DELIVERED' ? 'bg-green-600' : 'bg-green-100'}`}></div>
-                          <span className="text-[10px] uppercase font-bold text-gray-600">Booked</span>
+                          <span className="text-[10px] uppercase font-bold text-gray-600">{t('booking.ticket.booked', 'Booked')}</span>
                         </div>
                         <div className={`relative z-10 flex flex-col items-center gap-1`}>
                           <div className={`h-4 w-4 rounded-full border-2 border-zinc-900 ${selectedTruckBooking.status === 'IN_TRANSIT' || selectedTruckBooking.status === 'DELIVERED' ? 'bg-green-600' : 'bg-green-100'}`}></div>
-                          <span className="text-[10px] uppercase font-bold text-gray-600">Onboard</span>
+                          <span className="text-[10px] uppercase font-bold text-gray-600">{t('booking.ticket.onboard', 'Onboard')}</span>
                         </div>
                         <div className={`relative z-10 flex flex-col items-center gap-1`}>
                           <div className={`h-4 w-4 rounded-full border-2 border-zinc-900 ${selectedTruckBooking.status === 'DELIVERED' ? 'bg-green-600' : 'bg-green-100'}`}></div>
-                          <span className="text-[10px] uppercase font-bold text-gray-600">Arrived</span>
+                          <span className="text-[10px] uppercase font-bold text-gray-600">{t('booking.ticket.arrived', 'Arrived')}</span>
                         </div>
                       </div>
                     </div>
@@ -698,19 +821,19 @@ export default function Booking() {
                   <div className="p-6 bg-white">
                     <div className="grid grid-cols-2 gap-y-4 gap-x-2 text-sm">
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Pickup From</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.ticket.pickupFrom', 'Pickup From')}</p>
                         <p className="text-green-900 font-medium truncate" title={selectedTruckBooking.pickupLocation}>{selectedTruckBooking.pickupLocation || 'N/A'}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Deliver To</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.ticket.deliverTo', 'Deliver To')}</p>
                         <p className="text-green-900 font-medium truncate" title={selectedTruckBooking.destinationMandi}>{selectedTruckBooking.destinationMandi}</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Cargo</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.ticket.cargo', 'Cargo')}</p>
                         <p className="text-green-900 font-medium">{selectedTruckBooking.cropType} ({selectedTruckBooking.quantity} Qtl)</p>
                       </div>
                       <div>
-                        <p className="text-gray-500 text-xs mb-1">Cost</p>
+                        <p className="text-gray-500 text-xs mb-1">{t('booking.ticket.cost', 'Cost')}</p>
                         <p className="text-green-900 font-medium">₹{selectedTruckBooking.cost}</p>
                       </div>
                     </div>
@@ -718,16 +841,16 @@ export default function Booking() {
                     <div className="mt-8 flex gap-3 flex-col sm:flex-row">
                       {selectedTruckBooking.status === 'PENDING' && (
                         <Button className="flex-1 bg-blue-500 hover:bg-blue-600 text-green-950" onClick={() => handleUpdateStatus(selectedTruckBooking._id, 'IN_TRANSIT')}>
-                          <Truck className="h-4 w-4 mr-2" /> Mark as Onboard
+                          <Truck className="h-4 w-4 mr-2" /> {t('booking.ticket.markOnboard', 'Mark as Onboard')}
                         </Button>
                       )}
                       {selectedTruckBooking.status === 'IN_TRANSIT' && (
                         <Button className="flex-1 bg-orange-500 hover:bg-orange-600 text-green-950" onClick={() => handleUpdateStatus(selectedTruckBooking._id, 'DELIVERED')}>
-                          <CheckCircle2 className="h-4 w-4 mr-2" /> Mark as Delivered
+                          <CheckCircle2 className="h-4 w-4 mr-2" /> {t('booking.ticket.markDelivered', 'Mark as Delivered')}
                         </Button>
                       )}
                       <Button variant="outline" className="flex-1 border-green-300 text-green-800 hover:bg-green-50" onClick={() => window.print()}>
-                        <Download className="h-4 w-4 mr-2" /> Download
+                        <Download className="h-4 w-4 mr-2" /> {t('booking.success.download', 'Download')}
                       </Button>
                     </div>
                   </div>

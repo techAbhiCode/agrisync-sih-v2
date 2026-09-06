@@ -1,8 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { Variants } from 'framer-motion';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, AlertCircle, Filter, Check, LineChart, MapPin } from 'lucide-react';
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { TrendingUp, TrendingDown, AlertCircle, Filter, Check, LineChart as LineChartIcon, MapPin, BarChart3 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 
@@ -54,7 +54,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+import { useTranslation } from 'react-i18next';
+
 export default function MarketTrends() {
+  const { t } = useTranslation();
   const [timeframe, setTimeframe] = useState<'yearly' | 'monthly'>('yearly');
   const [gap, setGap] = useState<number>(0); // 0 = every month, 1 = skip 1, 2 = skip 2 (quarterly)
   
@@ -151,9 +154,9 @@ export default function MarketTrends() {
         <motion.div variants={itemVariants} className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-green-950 mb-2">
-              Market <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-600">Trends & AI Insights</span>
+              {t('marketTrends.title').split(' & ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-600">& {t('marketTrends.title').split(' & ')[1] || 'AI Insights'}</span>
             </h1>
-            <p className="text-gray-600 text-sm md:text-base">Real-time mandi prices and ML-based forecasting.</p>
+            <p className="text-gray-600 text-sm md:text-base">{t('marketTrends.subtitle')}</p>
           </div>
         </motion.div>
 
@@ -161,7 +164,7 @@ export default function MarketTrends() {
         <motion.div variants={itemVariants} className="space-y-4 mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-xl font-bold text-green-950 flex items-center gap-2">
-              <MapPin className="h-5 w-5 text-green-700" /> Latest Mandi Prices
+              <MapPin className="h-5 w-5 text-green-700" /> {t('marketTrends.latestPrices')}
             </h2>
             <div className="flex gap-2 w-full sm:w-auto">
               <select
@@ -239,7 +242,7 @@ export default function MarketTrends() {
           <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 lg:col-span-2">
             <CardContent className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
               <div className="flex items-center gap-2 text-gray-600 text-sm font-medium">
-                <Filter className="h-4 w-4" /> Compare Crops
+                <Filter className="h-4 w-4" /> {t('marketTrends.compareCrops')}
               </div>
               <div className="flex flex-wrap gap-2">
                 {(Object.keys(activeCrops) as Array<keyof typeof activeCrops>).map((crop) => (
@@ -269,13 +272,13 @@ export default function MarketTrends() {
                   onClick={() => setTimeframe('yearly')}
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'yearly' ? 'bg-green-50 text-green-950 shadow' : 'text-gray-500 hover:text-green-800'}`}
                 >
-                  5 Years
+                  {t('marketTrends.timeframe.yearly')}
                 </button>
                 <button
                   onClick={() => setTimeframe('monthly')}
                   className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-all ${timeframe === 'monthly' ? 'bg-green-50 text-green-950 shadow' : 'text-gray-500 hover:text-green-800'}`}
                 >
-                  Monthly (1Y)
+                  {t('marketTrends.timeframe.monthly')}
                 </button>
               </div>
 
@@ -287,12 +290,12 @@ export default function MarketTrends() {
                     exit={{ opacity: 0, height: 0 }}
                     className="flex flex-col gap-2"
                   >
-                    <Label className="text-gray-600 text-xs">Interval Gap</Label>
+                    <Label className="text-gray-600 text-xs">{t('marketTrends.gap.label')}</Label>
                     <div className="flex gap-2">
                       {[
-                        { val: 0, label: 'None' },
-                        { val: 1, label: '1 Mo' },
-                        { val: 2, label: 'Quarterly' }
+                        { val: 0, label: t('marketTrends.gap.none') },
+                        { val: 1, label: t('marketTrends.gap.oneMonth') },
+                        { val: 2, label: t('marketTrends.gap.quarterly') }
                       ].map((g) => (
                         <button
                           key={g.val}
@@ -312,48 +315,79 @@ export default function MarketTrends() {
           </Card>
         </motion.div>
 
-        {/* The Chart */}
+        {/* The Bar Chart */}
         <motion.div variants={itemVariants}>
-          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl">
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl mb-4">
             <CardHeader className="pb-2">
               <CardTitle className="text-green-950 flex items-center gap-2 text-lg">
-                <LineChart className="h-5 w-5 text-green-700" />
-                Commodity Price Aggregation (₹ per Quintal)
+                <BarChart3 className="h-5 w-5 text-green-700" />
+                {t('marketTrends.charts.bar')}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="h-[400px] w-full mt-4">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      {Object.keys(activeCrops).map(crop => (
-                        <linearGradient key={crop} id={`color${crop}`} x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor={COLORS[crop as keyof typeof COLORS].fill} stopOpacity={0.3}/>
-                          <stop offset="95%" stopColor={COLORS[crop as keyof typeof COLORS].fill} stopOpacity={0}/>
-                        </linearGradient>
-                      ))}
-                    </defs>
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                     <XAxis dataKey="label" stroke="#52525b" tick={{ fill: '#a1a1aa', fontSize: 12 }} tickMargin={10} />
                     <YAxis stroke="#52525b" tick={{ fill: '#a1a1aa', fontSize: 12 }} domain={['auto', 'auto']} />
                     <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
                     <Tooltip content={<CustomTooltip />} />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
                     
                     {(Object.keys(activeCrops) as Array<keyof typeof activeCrops>).map((crop) => (
                       activeCrops[crop] && (
-                        <Area 
+                        <Bar 
                           key={crop}
-                          type="monotone" 
                           dataKey={crop} 
                           name={crop}
-                          stroke={COLORS[crop].stroke} 
-                          strokeWidth={3} 
-                          fillOpacity={1} 
-                          fill={`url(#color${crop})`} 
+                          fill={COLORS[crop].fill} 
+                          radius={[4, 4, 0, 0]}
                           animationDuration={1000}
                         />
                       )
                     ))}
-                  </AreaChart>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* The Line Chart (Trend Analysis) */}
+        <motion.div variants={itemVariants}>
+          <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl mb-4">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-green-950 flex items-center gap-2 text-lg">
+                <LineChartIcon className="h-5 w-5 text-green-700" />
+                {t('marketTrends.charts.line')}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <XAxis dataKey="label" stroke="#52525b" tick={{ fill: '#a1a1aa', fontSize: 12 }} tickMargin={10} />
+                    <YAxis stroke="#52525b" tick={{ fill: '#a1a1aa', fontSize: 12 }} domain={['auto', 'auto']} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#27272a" vertical={false} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend iconType="plainline" wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
+                    
+                    {(Object.keys(activeCrops) as Array<keyof typeof activeCrops>).map((crop) => (
+                      activeCrops[crop] && (
+                        <Line 
+                          key={crop}
+                          type="monotone"
+                          dataKey={crop} 
+                          name={crop}
+                          stroke={COLORS[crop].stroke}
+                          strokeWidth={3}
+                          dot={{ r: 4, strokeWidth: 2 }}
+                          activeDot={{ r: 6, strokeWidth: 0 }}
+                          animationDuration={1000}
+                        />
+                      )
+                    ))}
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
@@ -369,11 +403,11 @@ export default function MarketTrends() {
               </div>
               <div>
                 <h3 className="text-green-600 font-semibold mb-1 text-sm flex items-center gap-2">
-                  Market Forecast (AI)
+                  {t('marketTrends.ai.forecast')}
                   {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                 </h3>
                 <p className="text-gray-600 text-xs leading-relaxed">
-                  {isLoading ? "Analyzing market trends..." : (insights.prediction || "Select timeframe to see AI market predictions.")}
+                  {isLoading ? t('marketTrends.ai.forecastLoading') : (insights.prediction || t('marketTrends.ai.forecastPlaceholder'))}
                 </p>
               </div>
             </CardContent>
@@ -386,11 +420,11 @@ export default function MarketTrends() {
               </div>
               <div>
                 <h3 className="text-orange-500 font-semibold mb-1 text-sm flex items-center gap-2">
-                  Smart Spoilage Alert
+                  {t('marketTrends.ai.alert')}
                   {isLoading && <Loader2 className="h-3 w-3 animate-spin" />}
                 </h3>
                 <p className="text-gray-600 text-xs leading-relaxed">
-                  {isLoading ? "Generating risk assessment..." : (insights.alert || "Select timeframe to see AI spoilage alerts.")}
+                  {isLoading ? t('marketTrends.ai.alertLoading') : (insights.alert || t('marketTrends.ai.alertPlaceholder'))}
                 </p>
               </div>
             </CardContent>

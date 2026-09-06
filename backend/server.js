@@ -43,6 +43,7 @@ const bookingRoutes = require('./src/routes/booking');
 const userRoutes = require('./src/routes/user');
 const advisoryRoutes = require('./src/routes/advisory');
 const insightsRoutes = require('./src/routes/insights');
+const assistantRoutes = require('./src/routes/assistant');
 
 // Ek naya secure route add karein
 app.get('/api/auth/verify', verifyToken, (req, res) => {
@@ -67,6 +68,8 @@ app.use('/api/notifications', notificationRoutes);
 // Register advisory routes
 app.use('/api/advisory', advisoryRoutes);
 app.use('/api/insights', insightsRoutes);
+// Register assistant routes
+app.use('/api/assistant', assistantRoutes);
 // Register admin routes
 const adminRoutes = require('./src/routes/admin');
 app.use('/api/admin', adminRoutes);
@@ -279,8 +282,13 @@ app.put('/api/logistics/book-truck/:id/status', verifyToken, async (req, res) =>
 
 const PORT = process.env.PORT || 5000;
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`Server initialized on port ${PORT}`);
+  // Connect to the database on startup
+  connectDB().then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server initialized on port ${PORT}`);
+    });
+  }).catch(err => {
+    console.error("Failed to connect to DB on startup:", err);
   });
 }
 

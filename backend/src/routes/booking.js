@@ -18,4 +18,13 @@ router.put('/status', verifyToken, bookingController.updateStatus);
 // Get Mandi Dashboard Stats & Recent Scans
 router.get('/mandi/dashboard', verifyToken, bookingController.getMandiDashboard);
 
+// Get Slot Availability
+router.get('/slots/availability', verifyToken, bookingController.getSlotAvailability);
+
+// Verify booking time window
+router.post('/verify', verifyToken, bookingController.verifyBooking);
+
+// Report emergency delay
+router.post('/report-delay', verifyToken, bookingController.reportDelay);
+
 module.exports = router;

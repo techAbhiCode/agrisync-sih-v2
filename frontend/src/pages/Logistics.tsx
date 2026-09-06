@@ -10,8 +10,10 @@ import MandiMap from '@/components/MandiMap';
 import { getNearbyMandis, bookTruck, getMyTruckBookings } from '@/lib/api';
 import { useNotificationStore } from '@/store/notificationStore';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 export default function Logistics() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<{lat: number, lng: number} | null>(null);
   const [mandis, setMandis] = useState<any[]>([]);
@@ -127,9 +129,9 @@ export default function Logistics() {
         <div>
           <h1 className="text-4xl font-extrabold tracking-tight text-green-950 mb-2 flex items-center gap-3">
             <Truck className="h-10 w-10 text-green-600" />
-            Micro-<span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-600">Logistics</span>
+            {t('logistics.header.title').split('-')[0]}-<span className="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-600">{t('logistics.header.title').split('-')[1] || 'Logistics'}</span>
           </h1>
-          <p className="text-gray-600">Real-time geospatial tracking and AI route optimization.</p>
+          <p className="text-gray-600">{t('logistics.header.subtitle')}</p>
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -145,7 +147,7 @@ export default function Logistics() {
                     <div className="absolute inset-0 bg-green-600/5 mix-blend-overlay"></div>
                     <CardHeader className="pb-3 border-b border-white/5">
                       <CardTitle className="text-lg flex items-center gap-2 text-lime-400">
-                        <CloudLightning className="h-5 w-5" /> AI Logistics Advisory
+                        <CloudLightning className="h-5 w-5" /> {t('logistics.advisory.title')}
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4 flex flex-col md:flex-row items-center gap-6">
@@ -162,7 +164,7 @@ export default function Logistics() {
                         <div className="flex flex-col items-center">
                           <Droplets className="h-6 w-6 text-blue-400 mb-1" />
                           <span className="font-bold text-green-950">{weather.humidity}%</span>
-                          <span className="text-xs">Humidity</span>
+                          <span className="text-xs">{t('logistics.advisory.humidity')}</span>
                         </div>
                       </div>
                     </CardContent>
@@ -183,7 +185,7 @@ export default function Logistics() {
                   : 'text-gray-600 hover:text-green-900'
                 }`}
               >
-                Nearest Hubs
+                {t('logistics.tabs.hubs')}
               </button>
               <button
                 onClick={() => setActiveTab('trucks')}
@@ -193,7 +195,7 @@ export default function Logistics() {
                   : 'text-gray-600 hover:text-green-900'
                 }`}
               >
-                Available Trucks
+                {t('logistics.tabs.trucks')}
               </button>
               <button
                 onClick={() => setActiveTab('my-trucks')}
@@ -203,19 +205,19 @@ export default function Logistics() {
                   : 'text-gray-600 hover:text-green-900'
                 }`}
               >
-                My Trucks
+                {t('logistics.tabs.myTrucks')}
               </button>
             </div>
 
             <Card className="bg-white/40 backdrop-blur-xl border-green-200/50 shadow-2xl h-[600px] flex flex-col">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-950">
-                  {activeTab === 'hubs' && <><MapPin className="h-5 w-5 text-green-600" /> Nearest Active Hubs</>}
-                  {activeTab === 'trucks' && <><Truck className="h-5 w-5 text-orange-500" /> Available Trucks</>}
-                  {activeTab === 'my-trucks' && <><Package className="h-5 w-5 text-blue-500" /> My Truck Bookings</>}
+                  {activeTab === 'hubs' && <><MapPin className="h-5 w-5 text-green-600" /> {t('logistics.tabs.hubs')}</>}
+                  {activeTab === 'trucks' && <><Truck className="h-5 w-5 text-orange-500" /> {t('logistics.tabs.trucks')}</>}
+                  {activeTab === 'my-trucks' && <><Package className="h-5 w-5 text-blue-500" /> {t('logistics.tabs.myTrucks')}</>}
                 </CardTitle>
                 <CardDescription className="text-gray-500">
-                  {loading ? 'Locating...' : `Based on your live GPS coordinates in ${weather?.location || 'Unknown'}.`}
+                  {loading ? t('logistics.card.locating') : `${t('logistics.card.basedOn')} ${weather?.location || t('logistics.card.unknown')}.`}
                 </CardDescription>
 
               </CardHeader>
@@ -250,11 +252,11 @@ export default function Logistics() {
                         
                         <div className="grid grid-cols-2 gap-2 text-xs mb-4">
                           <div className="bg-green-50 rounded p-2 text-center">
-                            <span className="block text-gray-500">Capacity</span>
+                            <span className="block text-gray-500">{t('logistics.hub.capacity')}</span>
                             <span className="font-medium text-green-950">{mandi.capacity} Qtl</span>
                           </div>
                           <div className="bg-green-50 rounded p-2 text-center">
-                            <span className="block text-gray-500">Available</span>
+                            <span className="block text-gray-500">{t('logistics.hub.available')}</span>
                             <span className="font-medium text-green-700">{mandi.available} Qtl</span>
                           </div>
                         </div>
@@ -263,7 +265,7 @@ export default function Logistics() {
                           onClick={() => navigate(`/booking?mandi=${encodeURIComponent(mandi.name)}`)}
                           className="w-full bg-green-600 hover:bg-green-700 text-zinc-950 font-semibold text-sm h-9"
                         >
-                          Book Slot Here <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                          {t('logistics.hub.btnBook')} <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                       </motion.li>
                     ))}
@@ -288,11 +290,11 @@ export default function Logistics() {
                         
                         <div className="grid grid-cols-2 gap-2 text-xs mb-4">
                           <div className="bg-green-50 rounded p-2 text-center">
-                            <span className="block text-gray-500">Type</span>
+                            <span className="block text-gray-500">{t('logistics.truck.type')}</span>
                             <span className="font-medium text-green-950">{truck.type}</span>
                           </div>
                           <div className="bg-green-50 rounded p-2 text-center">
-                            <span className="block text-gray-500">Capacity</span>
+                            <span className="block text-gray-500">{t('logistics.truck.capacity')}</span>
                             <span className="font-medium text-green-700">{truck.capacity} Qtl</span>
                           </div>
                         </div>
@@ -301,7 +303,7 @@ export default function Logistics() {
                           onClick={() => setBookingTruck(truck)}
                           className="w-full bg-orange-500 hover:bg-orange-600 text-green-950 font-semibold text-sm h-9"
                         >
-                          Book Truck <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                          {t('logistics.truck.btnBook')} <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
                         </Button>
                       </motion.li>
                     ))}

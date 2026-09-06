@@ -2,7 +2,7 @@
 
 ## 🔗 Quick Links
 
-- 🚀 **Deploy Link:** [Project domain](https://chatgpt.com/share/6a9dc796-c758-83ee-b2ac-00bc9806b699?ogimg=plain)
+- 🚀 **Deploy Link:** [Project domain](https://agrisync-sih-v20-mauve.vercel.app)
 - 🎥 **Video Explanation:** [Watch the project explanation video](YOUR_VIDEO_LINK)
 - 📖 **Project Explanation:** [View the detailed project explanation](YOUR_PROJECT_EXPLANATION_LINK)
 

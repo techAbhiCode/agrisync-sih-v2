@@ -3,7 +3,7 @@
 ## 🔗 Quick Links
 
 - 🚀 **Deploy Link:** [Project domain](https://agrisync-sih-v20-mauve.vercel.app)
-- 🎥 **Video Explanation:** [Watch the project explanation video](YOUR_VIDEO_LINK)
+- 🎥 **Video Explanation:** [Watch the project explanation video](https://youtu.be/XEvYpcfo3t0)
 - 📖 **Project Explanation:** [View the detailed project explanation](YOUR_PROJECT_EXPLANATION_LINK)
 
 ---
